@@ -3,28 +3,21 @@
 <head>
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1"/>
-<title>DTF Gang Sheet Builder — Customer Proof & Staff Export</title>
+<title>DTF Gang Sheet Builder — Proof/Order/Staff Export + Roll + Auto-pack</title>
 <style>
   :root{
-    --bg:#0b1220;           /* page background */
-    --panel:#0f172a;        /* panels */
-    --muted:#93a4c2;        /* secondary text */
-    --text:#e6eefc;         /* primary text */
-    --brand:#7c3aed;        /* purple */
-    --brand-2:#06b6d4;      /* cyan accent */
-    --accent:#22c55e;       /* green success */
-    --danger:#ef4444;       /* red danger */
-    --border:#1f2a44;
-    --chip:#111a33;
+    --bg:#0b1220; --panel:#0f172a; --muted:#93a4c2; --text:#e6eefc; --brand:#7c3aed; --brand-2:#06b6d4;
+    --accent:#22c55e; --danger:#ef4444; --border:#1f2a44; --chip:#111a33;
   }
   *{box-sizing:border-box}
-  body{margin:0;font:14px/1.4 Inter,ui-sans-serif,system-ui,Segoe UI,Roboto,Helvetica,Arial;color:var(--text);background:linear-gradient(180deg,#0b1220,#0b1220 280px,#0e1628 100%)}
+  body{margin:0;font:14px/1.4 Inter,ui-sans-serif,system-ui,Segoe UI,Roboto,Helvetica,Arial;color:var(--text);
+       background:linear-gradient(180deg,#0b1220,#0b1220 280px,#0e1628 100%)}
   header{position:sticky;top:0;z-index:10;border-bottom:1px solid var(--border);background:rgba(11,18,32,.7);backdrop-filter:saturate(1.2) blur(8px)}
   header .inner{max-width:1200px;margin:0 auto;padding:14px 16px;display:flex;gap:12px;align-items:center}
   .title{font-weight:800;font-size:18px}
   .badge{background:linear-gradient(90deg,var(--brand),var(--brand-2));padding:6px 10px;border-radius:999px;font-weight:700;font-size:12px}
   .subtle{color:var(--muted);font-size:12px}
-  main{max-width:1200px;margin:0 auto;padding:18px;display:grid;grid-template-columns:360px 1fr 320px;gap:16px}
+  main{max-width:1200px;margin:0 auto;padding:18px;display:grid;grid-template-columns:380px 1fr 320px;gap:16px}
   @media (max-width:1100px){main{grid-template-columns:1fr}}
   .panel{background:linear-gradient(180deg,#0f172a,#0c1324);border:1px solid var(--border);border-radius:14px;padding:12px;box-shadow:0 3px 20px rgba(0,0,0,.2)}
   .panel h3{margin:0 0 8px;font-size:14px;font-weight:800}
@@ -61,8 +54,8 @@
 <body>
 <header><div class="inner">
   <div class="badge">DTF Builder</div>
-  <div class="title">A3/A4 Gang Sheet</div>
-  <div class="subtle">Upload → resize in cm → customer proof → staff export</div>
+  <div class="title">A3/A4 + Roll 33×100 cm</div>
+  <div class="subtle">Upload → resize (cm) → auto-pack → proof → staff export</div>
 </div></header>
 
 <main>
@@ -83,7 +76,7 @@
       <input type="file" id="fileInput" accept="image/*,.svg" multiple hidden/>
       <button class="btn ghost" id="resetBtn" style="margin-left:auto">Reset</button>
     </div>
-    <div class="small" style="margin-top:6px">You can also drag & drop or paste (Ctrl/⌘+V). Best: PNG with transparency.</div>
+    <div class="small" style="margin-top:6px">Drag & drop or paste (Ctrl/⌘+V). Best: PNG with transparency.</div>
 
     <div class="line"></div>
 
@@ -100,6 +93,16 @@
         <button class="btn" id="mirrorBtn" style="margin-left:auto">Mirror</button>
         <button class="btn danger" id="deleteBtn">Delete</button>
       </div>
+    </div>
+
+    <div class="line"></div>
+
+    <h3>Packing</h3>
+    <div class="row">
+      <div class="label">Gutter (mm)</div>
+      <input class="input" style="width:90px" type="number" id="gutterMm" min="0" step="1" value="5"/>
+      <button class="btn" id="autoPackBtn">Auto-pack (tight)</button>
+      <span class="small">Shelf FFD — good density, very fast</span>
     </div>
 
     <div class="line"></div>
@@ -127,23 +130,12 @@
   <section class="panel" id="orderPanel">
     <h3>Order</h3>
     <div class="grid2">
-      <div>
-        <div class="label">Name</div>
-        <input class="input" id="custName" placeholder="Customer name"/>
-      </div>
-      <div>
-        <div class="label">Email</div>
-        <input class="input" id="custEmail" placeholder="name@example.com"/>
-      </div>
-      <div>
-        <div class="label">Quantity (sheets)</div>
-        <input class="input" id="qty" type="number" min="1" value="1"/>
-      </div>
-      <div>
-        <div class="label">Finish</div>
+      <div><div class="label">Name</div><input class="input" id="custName" placeholder="Customer name"/></div>
+      <div><div class="label">Email</div><input class="input" id="custEmail" placeholder="name@example.com"/></div>
+      <div><div class="label">Quantity (sheets)</div><input class="input" id="qty" type="number" min="1" value="1"/></div>
+      <div><div class="label">Finish</div>
         <select class="select" id="finish">
-          <option value="matte">Matte</option>
-          <option value="gloss">Gloss</option>
+          <option value="matte">Matte</option><option value="gloss">Gloss</option>
         </select>
       </div>
     </div>
@@ -153,7 +145,7 @@
     <div class="line"></div>
 
     <div class="row" style="justify-content:space-between">
-      <div class="small" id="priceLine">A3 £5.00 • A4 £3.00 — Est: £0.00</div>
+      <div class="small" id="priceLine">A3 £5.00 • A4 £3.00 • Roll £12.00 — Est: £0.00</div>
       <button class="btn brand" id="placeOrderBtn">Place Order</button>
     </div>
 
@@ -171,15 +163,19 @@
   </section>
 </main>
 
-<div class="footer">A4 export 2480×3508 px • A3 export 3508×4961 px • Proofs contain watermark, production requires staff PIN</div>
+<div class="footer">Proofs contain watermark (150 DPI). Production (300 DPI) requires staff PIN. Presets: A4, A3, Roll 33×100 cm.</div>
 
 <script>
 /* ===== Core constants / helpers ===== */
 const MM_PER_INCH=25.4, DPI=300, PROOF_DPI=150;
 const PX_PER_MM = DPI / MM_PER_INCH;
 const PX_PER_MM_PROOF = PROOF_DPI / MM_PER_INCH;
-const SHEETS = { A4:{label:"A4 (210 × 297 mm)",mm:{w:210,h:297}, price:3.00},
-                 A3:{label:"A3 (297 × 420 mm)",mm:{w:297,h:420}, price:5.00} };
+
+const SHEETS = {
+  A4:{label:"A4 (210 × 297 mm)",mm:{w:210,h:297}, price:3.00},
+  A3:{label:"A3 (297 × 420 mm)",mm:{w:297,h:420}, price:5.00},
+  ROLL:{label:"Roll 33×100 cm (330 × 1000 mm)", mm:{w:330,h:1000}, price:12.00}
+};
 
 function mmToPxPrint(mm){ return Math.round(mm * PX_PER_MM); }
 function mmToPxProof(mm){ return Math.round(mm * PX_PER_MM_PROOF); }
@@ -212,6 +208,9 @@ const lockAspect = document.getElementById('lockAspect');
 const mirrorBtn = document.getElementById('mirrorBtn');
 const deleteBtn = document.getElementById('deleteBtn');
 
+const gutterMmEl = document.getElementById('gutterMm');
+const autoPackBtn = document.getElementById('autoPackBtn');
+
 const downloadProofBtn = document.getElementById('downloadProofBtn');
 const placeOrderBtn = document.getElementById('placeOrderBtn');
 const exportProdBtn = document.getElementById('exportProdBtn');
@@ -236,7 +235,7 @@ function renderSheetButtons(){
   Object.keys(SHEETS).forEach(k=>{
     const b=document.createElement('button');
     b.className='chip'+(sheetKey===k?' active':'');
-    b.textContent=`${k}`;
+    b.textContent = (k==='ROLL'?'ROLL 33×100':k);
     b.onclick=()=>{ sheetKey=k; computePrice(); render(); };
     sheetButtons.appendChild(b);
   });
@@ -342,6 +341,30 @@ window.addEventListener('keydown', e=>{
   render();
 });
 
+/* ===== Auto-pack (Shelf FFD with gutter) ===== */
+autoPackBtn.onclick = () => {
+  if (!items.length) return;
+  const s = sheetMm();
+  const gutter = Math.max(0, parseFloat(gutterMmEl.value||'0'));
+  // Sort by height (descending) — First Fit Decreasing
+  const sorted = [...items].sort((a,b)=> b.hMm - a.hMm);
+  let x = gutter, y = gutter, rowH = 0;
+  for (const it of sorted){
+    const w = it.wMm, h = it.hMm;
+    if (x + w + gutter > s.w + 1e-6) { // new shelf
+      x = gutter;
+      y += rowH + gutter;
+      rowH = 0;
+    }
+    // If it doesn't fit vertically, stop placing more (or you could scale down last row)
+    if (y + h + gutter > s.h + 1e-6) break;
+    it.xMm = x; it.yMm = y;
+    x += w + gutter;
+    rowH = Math.max(rowH, h);
+  }
+  render();
+};
+
 /* ===== Proof / Production export ===== */
 downloadProofBtn.onclick=()=> exportCanvas('proof');
 exportProdBtn.onclick=()=> exportCanvas('prod');
@@ -351,8 +374,7 @@ function exportCanvas(kind){
   const wPx = kind==='prod' ? Math.max(1,mmToPxPrint(s.w)) : Math.max(1,mmToPxProof(s.w));
   const hPx = kind==='prod' ? Math.max(1,mmToPxPrint(s.h)) : Math.max(1,mmToPxProof(s.h));
   const c=document.createElement('canvas'); c.width=wPx; c.height=hPx;
-  const ctx=c.getContext('2d');
-  ctx.clearRect(0,0,wPx,hPx);
+  const ctx=c.getContext('2d'); ctx.clearRect(0,0,wPx,hPx);
 
   for(const it of items){
     const x = Math.round((it.xMm/s.w)*wPx);
@@ -366,8 +388,6 @@ function exportCanvas(kind){
   }
 
   if(kind==='proof'){
-    // add watermark
-    const text='PROOF ONLY';
     ctx.save();
     ctx.globalAlpha=0.20;
     ctx.translate(wPx/2,hPx/2);
@@ -375,7 +395,7 @@ function exportCanvas(kind){
     ctx.fillStyle='#ffffff';
     ctx.font=`${Math.floor(wPx*0.08)}px system-ui,Arial`;
     ctx.textAlign='center';
-    ctx.fillText(text,0,0);
+    ctx.fillText('PROOF ONLY',0,0);
     ctx.restore();
   }
 
@@ -389,7 +409,7 @@ function exportCanvas(kind){
 function computePrice(){
   const base = SHEETS[sheetKey].price;
   const qty = Number(qtyEl.value||1);
-  priceLine.textContent = `${sheetKey} £${base.toFixed(2)} • Qty ${qty} — Est: £${(base*qty).toFixed(2)}`;
+  priceLine.textContent = `${sheetKey==='ROLL'?'Roll 33×100 cm':'A3/A4'} £${base.toFixed(2)} • Qty ${qty} — Est: £${(base*qty).toFixed(2)}`;
 }
 qtyEl.addEventListener('input', computePrice); finishEl.addEventListener('change', computePrice);
 computePrice();
@@ -405,14 +425,14 @@ placeOrderBtn.onclick=()=>{
   afterOrder.style.display='block';
   wmEl.style.display='grid';
   orderStatus.textContent=`Order #${orderId.slice(-6)} placed • awaiting staff`;
-  exportProdBtn.disabled=true; // stays disabled until staff unlock
+  exportProdBtn.disabled=true;
   hint.textContent='Order placed — editing locked (staff can unlock)';
   alert('Order placed. You can download a proof. Staff will finalize your print.');
 };
 
 staffUnlockBtn.onclick=()=>{
   const pin = prompt('Staff PIN:');
-  // TODO: change this to your real PIN before publishing
+  // CHANGE THIS before publishing!
   const STAFF_PIN='4312';
   if(pin===STAFF_PIN){
     staffMode=true;
@@ -457,11 +477,11 @@ function render(){
   });
 
   showSelection(getItem(activeId));
-
-  // Visual watermark toggle when order placed & not staff
   wmEl.style.display = (orderPlaced && !staffMode) ? 'grid' : 'none';
   hint.style.display = items.length? 'none' : 'block';
 }
+
+/* init */
 render();
 </script>
 </body>
