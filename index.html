@@ -3,11 +3,12 @@
 <head>
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1"/>
-<title>DTF Gang Sheet — MaxRects & Multi-Sheet (Proof/Order/Staff)</title>
+<title>DTF Gang Sheet — MaxRects & Multi-Sheet</title>
 <style>
   :root{
-    --bg:#0b1220; --panel:#0f172a; --muted:#93a4c2; --text:#e6eefc; --brand:#7c3aed; --brand-2:#06b6d4;
-    --accent:#22c55e; --danger:#ef4444; --border:#1f2a44; --chip:#111a33;
+    --bg:#0b1220; --panel:#0f172a; --muted:#93a4c2; --text:#e6eefc; 
+    --brand:#7c3aed; --brand-2:#06b6d4; --accent:#22c55e; 
+    --danger:#ef4444; --border:#1f2a44; --chip:#111a33;
   }
   *{box-sizing:border-box}
   body{margin:0;font:14px/1.4 Inter,ui-sans-serif,system-ui,Segoe UI,Roboto,Helvetica,Arial;color:var(--text);
@@ -28,27 +29,23 @@
   .btn.danger{border-color:#5b1c1c;background:#1a0f12;color:#fecaca}
   .btn.ghost{background:#0f172a}
   .chip{padding:6px 10px;border:1px solid var(--border);border-radius:999px;background:var(--chip);cursor:pointer}
-  .chip.active{outline:2px solid transparent;background:linear-gradient(90deg,var(--brand),var(--brand-2));color:#fff;border-color:transparent}
+  .chip.active{background:linear-gradient(90deg,var(--brand),var(--brand-2));color:#fff;border-color:transparent}
   .small{font-size:12px;color:var(--muted)}
   .grid2{display:grid;grid-template-columns:1fr 1fr;gap:8px}
   .label{font-size:11px;color:var(--muted);margin-bottom:4px}
   .input,.select,textarea{width:100%;padding:10px 12px;border:1px solid var(--border);background:#0b1220;color:var(--text);border-radius:10px;font:inherit}
   .line{height:1px;background:var(--border);margin:10px 0}
   .pill{font-size:11px;color:#cbd5e1;background:#0b1220;border:1px solid var(--border);padding:4px 8px;border-radius:999px}
-
   .editorWrap{background:linear-gradient(180deg,#0f172a,#0c1324);border:1px solid var(--border);border-radius:14px;padding:12px}
   .editorHead{display:flex;justify-content:space-between;margin-bottom:8px}
   .drop{position:relative;margin:0 auto;background:#0b1220;border:1px dashed #2a3a5f;border-radius:12px;overflow:hidden}
-  .drop.drag{background:#0e1a33;border-color:#6b7aa6}
   .item{position:absolute;cursor:grab;filter:drop-shadow(0 6px 34px rgba(0,0,0,.3))}
   .item.active{outline:2px solid var(--brand-2)}
   .hint{position:absolute;inset:auto 10px 10px auto;background:rgba(12,19,36,.9);border:1px solid var(--border);color:#dbeafe;
         padding:7px 9px;border-radius:9px;font-size:11px}
   .footer{padding:14px 16px;text-align:center;color:var(--muted);font-size:12px}
-
   .wm{position:absolute;inset:0;pointer-events:none;display:grid;place-items:center;opacity:.18}
   .wm span{font-weight:800;font-size:48px;letter-spacing:.2em;color:#e2e8f0;mix-blend-mode:overlay}
-
   .sheetbar{display:flex;align-items:center;gap:8px}
 </style>
 </head>
@@ -60,44 +57,23 @@
 </div></header>
 
 <main>
-  <!-- CUSTOMER CONTROLS -->
-  <section class="panel" id="customerPanel">
+  <!-- left controls -->
+  <section class="panel">
     <h3>Sheet</h3>
     <div class="row" id="sheetButtons"></div>
     <div class="row" style="margin-top:8px">
       <button class="btn" id="orientBtn">Portrait</button>
       <div class="pill" id="dimLabel" style="margin-left:auto"></div>
     </div>
-
     <div class="line"></div>
-
     <h3>Upload</h3>
     <div class="row">
       <button class="btn brand" id="uploadBtn">Upload images</button>
       <input type="file" id="fileInput" accept="image/*,.svg" multiple hidden/>
       <button class="btn ghost" id="resetBtn" style="margin-left:auto">Reset</button>
     </div>
-    <div class="small" style="margin-top:6px">Drag & drop or paste (Ctrl/⌘+V). Best: PNG with transparency.</div>
-
+    <div class="small" style="margin-top:6px">Drag & drop or paste. Best: PNG with transparency.</div>
     <div class="line"></div>
-
-    <div id="selectionPanel" style="display:none">
-      <h3>Selection (size & position)</h3>
-      <div class="grid2">
-        <div><div class="label">Width (cm)</div><input class="input" type="number" step="0.1" min="0.5" id="wField"/></div>
-        <div><div class="label">Height (cm)</div><input class="input" type="number" step="0.1" min="0.5" id="hField"/></div>
-        <div><div class="label">X (cm)</div><input class="input" type="number" step="0.1" id="xField"/></div>
-        <div><div class="label">Y (cm)</div><input class="input" type="number" step="0.1" id="yField"/></div>
-      </div>
-      <div class="row" style="margin-top:8px">
-        <label class="row small"><input type="checkbox" id="lockAspect" checked style="margin-right:6px">Lock aspect</label>
-        <button class="btn" id="mirrorBtn" style="margin-left:auto">Mirror</button>
-        <button class="btn danger" id="deleteBtn">Delete</button>
-      </div>
-    </div>
-
-    <div class="line"></div>
-
     <h3>Packing</h3>
     <div class="row">
       <div class="label">Gutter (mm)</div>
@@ -105,29 +81,21 @@
       <label class="row small"><input type="checkbox" id="allowRotate" checked style="margin-right:6px">Allow 90° rotation</label>
       <button class="btn" id="autoPackBtn">Auto-pack (MaxRects)</button>
     </div>
-    <div class="small">Creates multiple sheets automatically if needed.</div>
-
     <div class="line"></div>
-
-    <h3>Proof (customer)</h3>
+    <h3>Proof</h3>
     <div class="row">
-      <button class="btn" id="downloadProofBtn">Download Proof (current sheet)</button>
+      <button class="btn" id="downloadProofBtn">Current Proof</button>
       <button class="btn" id="downloadAllProofsBtn">All Proofs</button>
-      <span class="small">150 DPI PNG • watermarked</span>
     </div>
   </section>
 
-  <!-- EDITOR -->
+  <!-- middle editor -->
   <section class="editorWrap">
-    <div class="editorHead">
-      <div style="font-weight:800">Editor</div>
-      <div class="subtle">Drag & drop • Click image to select • Arrow keys to nudge</div>
-    </div>
+    <div class="editorHead"><b>Editor</b><div class="subtle">Drag • Click • Nudge</div></div>
     <div class="sheetbar">
       <button class="btn" id="prevSheetBtn">⟵</button>
-      <div class="pill" id="sheetIndicator">Sheet 1 / 1</div>
+      <div class="pill" id="sheetIndicator">Sheet 1/1</div>
       <button class="btn" id="nextSheetBtn">⟶</button>
-      <div class="small" id="sheetNote" style="margin-left:8px"></div>
     </div>
     <div id="drop" class="drop" style="margin-top:8px">
       <div id="wm" class="wm" style="display:none"><span>PROOF ONLY</span></div>
@@ -135,482 +103,94 @@
     </div>
   </section>
 
-  <!-- ORDER / STAFF -->
-  <section class="panel" id="orderPanel">
+  <!-- right order/staff -->
+  <section class="panel">
     <h3>Order</h3>
     <div class="grid2">
-      <div><div class="label">Name</div><input class="input" id="custName" placeholder="Customer name"/></div>
-      <div><div class="label">Email</div><input class="input" id="custEmail" placeholder="name@example.com"/></div>
-      <div><div class="label">Quantity (sheets)</div><input class="input" id="qty" type="number" min="1" value="1"/></div>
+      <div><div class="label">Name</div><input class="input" id="custName"/></div>
+      <div><div class="label">Email</div><input class="input" id="custEmail"/></div>
+      <div><div class="label">Qty</div><input class="input" id="qty" type="number" min="1" value="1"/></div>
       <div><div class="label">Finish</div>
-        <select class="select" id="finish">
-          <option value="matte">Matte</option><option value="gloss">Gloss</option>
-        </select>
+        <select class="select" id="finish"><option>Matte</option><option>Gloss</option></select>
       </div>
     </div>
     <div class="label" style="margin-top:8px">Notes</div>
-    <textarea class="input" id="notes" rows="3" placeholder="Placement instructions, deadlines, etc."></textarea>
-
+    <textarea class="input" id="notes"></textarea>
     <div class="line"></div>
-
     <div class="row" style="justify-content:space-between">
-      <div class="small" id="priceLine">A3 £5.00 • A4 £3.00 • Roll £12.00 — Est: £0.00</div>
+      <div class="small" id="priceLine">A3 £5 • A4 £3 • Roll £12</div>
       <button class="btn brand" id="placeOrderBtn">Place Order</button>
     </div>
 
+    <!-- after order -->
     <div id="afterOrder" style="display:none">
       <div class="line"></div>
-      <div class="row" style="justify-content:space-between">
-        <div class="pill" id="orderStatus">Order placed • awaiting staff</div>
-        <button class="btn" id="staffUnlockBtn" title="Staff only">Staff unlock</button>
+      <h3>Staff Login</h3>
+      <div class="row" style="margin-bottom:8px">
+        <input class="input" id="staffPinInput" type="password" placeholder="Enter Staff PIN" style="flex:1"/>
+        <button class="btn brand" id="staffUnlockBtn">Unlock</button>
       </div>
-      <div class="row" style="margin-top:8px">
-        <button class="btn" id="exportProdBtn" disabled>Export Production (current sheet) @300 DPI</button>
-        <button class="btn" id="exportAllProdBtn" disabled>Export ALL Sheets @300 DPI</button>
+      <div class="small" id="staffMsg">Production locked until staff enters PIN.</div>
+      <div class="row" style="margin-top:12px">
+        <button class="btn" id="exportProdBtn" disabled>Export Current (300 DPI)</button>
+        <button class="btn" id="exportAllProdBtn" disabled>Export ALL Sheets (300 DPI)</button>
       </div>
-      <div class="small">Production exports require staff PIN. Proofs remain available to customers.</div>
     </div>
   </section>
 </main>
 
-<div class="footer">Proofs are 150 DPI + watermark. Production is 300 DPI (A4 2480×3508, A3 3508×4961, Roll 330×1000 mm). Multi-sheet packing via MaxRects.</div>
+<div class="footer">Proofs 150DPI + watermark. Production 300DPI requires staff PIN.</div>
 
 <script>
-/* ===== Core constants / helpers ===== */
-const MM_PER_INCH=25.4, DPI=300, PROOF_DPI=150;
-const PX_PER_MM = DPI / MM_PER_INCH;
-const PX_PER_MM_PROOF = PROOF_DPI / MM_PER_INCH;
+/* constants */
+const MM_PER_INCH=25.4,DPI=300,PROOF_DPI=150;
+const SHEETS={A4:{mm:{w:210,h:297},price:3},A3:{mm:{w:297,h:420},price:5},ROLL:{mm:{w:330,h:1000},price:12}};
+function mmToPx(mm,proof=false){return Math.round(mm*(proof?PROOF_DPI:DPI)/MM_PER_INCH);}
+function cmToMm(c){return c*10;} function mmToCm(m){return m/10;}
+function clamp(v,a,b){return Math.max(a,Math.min(v,b));} function uid(){return Date.now()+"_"+Math.random().toString(36).slice(2,7);}
 
-const SHEETS = {
-  A4:{label:"A4 (210 × 297 mm)",mm:{w:210,h:297}, price:3.00},
-  A3:{label:"A3 (297 × 420 mm)",mm:{w:297,h:420}, price:5.00},
-  ROLL:{label:"Roll 33×100 cm (330 × 1000 mm)", mm:{w:330,h:1000}, price:12.00}
-};
+/* state */
+let sheetKey='A3',landscape=false,items=[],currentSheetIndex=0,totalSheets=1,orderPlaced=false,staffMode=false,orderId=null;
 
-function mmToPxPrint(mm){ return Math.round(mm * PX_PER_MM); }
-function mmToPxProof(mm){ return Math.round(mm * PX_PER_MM_PROOF); }
-function mmToCm(mm){ return mm/10; }
-function cmToMm(cm){ return cm*10; }
-function clamp(v,min,max){ return Math.max(min, Math.min(max,v)); }
-function uid(){ return `${Date.now()}_${Math.random().toString(36).slice(2,7)}`; }
+/* elements */
+const drop=document.getElementById('drop'),wmEl=document.getElementById('wm'),hint=document.getElementById('hint');
+const sheetButtons=document.getElementById('sheetButtons'),orientBtn=document.getElementById('orientBtn'),dimLabel=document.getElementById('dimLabel');
+const uploadBtn=document.getElementById('uploadBtn'),fileInput=document.getElementById('fileInput'),resetBtn=document.getElementById('resetBtn');
+const autoPackBtn=document.getElementById('autoPackBtn'),gutterMmEl=document.getElementById('gutterMm'),allowRotateEl=document.getElementById('allowRotate');
+const downloadProofBtn=document.getElementById('downloadProofBtn'),downloadAllProofsBtn=document.getElementById('downloadAllProofsBtn');
+const placeOrderBtn=document.getElementById('placeOrderBtn'),afterOrder=document.getElementById('afterOrder');
+const exportProdBtn=document.getElementById('exportProdBtn'),exportAllProdBtn=document.getElementById('exportAllProdBtn');
+const staffPinInput=document.getElementById('staffPinInput'),staffUnlockBtn=document.getElementById('staffUnlockBtn'),staffMsg=document.getElementById('staffMsg');
+const sheetIndicator=document.getElementById('sheetIndicator');
+const prevSheetBtn=document.getElementById('prevSheetBtn'),nextSheetBtn=document.getElementById('nextSheetBtn');
+const custName=document.getElementById('custName'),custEmail=document.getElementById('custEmail'),qtyEl=document.getElementById('qty'),finishEl=document.getElementById('finish'),notes=document.getElementById('notes'),priceLine=document.getElementById('priceLine');
 
-/* ===== State ===== */
-let sheetKey='A3', landscape=false, items=[], activeId=null;
-let previewScale=2, orderPlaced=false, staffMode=false, orderId=null;
-let currentSheetIndex = 0; // preview page
-let totalSheets = 1;
+/* helpers */
+function sheetMm(){const s=SHEETS[sheetKey].mm;return landscape?{w:s.h,h:s.w}:s;}
 
-/* ===== Elements ===== */
-const drop = document.getElementById('drop');
-const wmEl = document.getElementById('wm');
-const hint = document.getElementById('hint');
-const sheetButtons = document.getElementById('sheetButtons');
-const orientBtn = document.getElementById('orientBtn');
-const dimLabel = document.getElementById('dimLabel');
-const uploadBtn = document.getElementById('uploadBtn');
-const fileInput = document.getElementById('fileInput');
-const resetBtn = document.getElementById('resetBtn');
+/* upload */
+uploadBtn.onclick=()=>fileInput.click();
+fileInput.onchange=e=>{[...e.target.files].forEach(addFile);}
+function addFile(f){const url=URL.createObjectURL(f),img=new Image();img.onload=()=>{items.push({id:uid(),name:f.name,src:url,img,wMm:(img.width/DPI*MM_PER_INCH),hMm:(img.height/DPI*MM_PER_INCH),xMm:5,yMm:5,sheet:0,mirrored:false});render();};img.src=url;}
 
-const selectionPanel = document.getElementById('selectionPanel');
-const wField = document.getElementById('wField');
-const hField = document.getElementById('hField');
-const xField = document.getElementById('xField');
-const yField = document.getElementById('yField');
-const lockAspect = document.getElementById('lockAspect');
-const mirrorBtn = document.getElementById('mirrorBtn');
-const deleteBtn = document.getElementById('deleteBtn');
+/* reset */
+resetBtn.onclick=()=>{items=[];currentSheetIndex=0;render();}
 
-const gutterMmEl = document.getElementById('gutterMm');
-const allowRotateEl = document.getElementById('allowRotate');
-const autoPackBtn = document.getElementById('autoPackBtn');
+/* packing with MaxRects */
+class MaxRectsBin{constructor(w,h){this.w=w;this.h=h;this.free=[{x:0,y:0,w,h}];}
+ insert(W,H,rotOk){let best=null;for(const r of this.free){if(W<=r.w&&H<=r.h){best={x:r.x,y:r.y,w:W,h:H,rot:false};break;}if(rotOk&&H<=r.w&&W<=r.h){best={x:r.x,y:r.y,w:H,h:W,rot:true};break;}}if(!best)return null;this.free=[];this.free.push({x:best.x+best.w,y:best.y,w:this.w-(best.x+best.w),h:best.h});this.free.push({x:best.x,y:best.y+best.h,w:best.w,h:this.h-(best.y+best.h)});return best;}}
+autoPackBtn.onclick=()=>{const s=sheetMm(),g=+gutterMmEl.value,rot=allowRotateEl.checked;items.sort((a,b)=>b.wMm*b.hMm-a.wMm*a.hMm);let bins=[new MaxRectsBin(s.w,s.h)],si=0;for(const it of items){let placed=bins[si].insert(it.wMm+g,it.hMm+g,rot);if(!placed){bins.push(new MaxRectsBin(s.w,s.h));si++;placed=bins[si].insert(it.wMm+g,it.hMm+g,rot);}it.sheet=si;it.xMm=placed.x+g/2;it.yMm=placed.y+g/2;if(placed.rot){[it.wMm,it.hMm]=[it.hMm,it.wMm];}}totalSheets=bins.length;currentSheetIndex=0;render();}
 
-const downloadProofBtn = document.getElementById('downloadProofBtn');
-const downloadAllProofsBtn = document.getElementById('downloadAllProofsBtn');
-const placeOrderBtn = document.getElementById('placeOrderBtn');
-const exportProdBtn = document.getElementById('exportProdBtn');
-const exportAllProdBtn = document.getElementById('exportAllProdBtn');
-const staffUnlockBtn = document.getElementById('staffUnlockBtn');
-const afterOrder = document.getElementById('afterOrder');
-const orderStatus = document.getElementById('orderStatus');
-const qtyEl = document.getElementById('qty');
-const finishEl = document.getElementById('finish');
-const priceLine = document.getElementById('priceLine');
-const custName = document.getElementById('custName');
-const custEmail = document.getElementById('custEmail');
-const notes = document.getElementById('notes');
+/* export */
+function exportSheet(idx,proof){const s=sheetMm(),w=mmToPx(s.w,!proof),h=mmToPx(s.h,!proof),c=document.createElement('canvas');c.width=w;c.height=h;const ctx=c.getContext('2d');items.filter(it=>it.sheet===idx).forEach(it=>{ctx.drawImage(it.img,(it.xMm/s.w)*w,(it.yMm/s.h)*h,(it.wMm/s.w)*w,(it.hMm/s.h)*h);});if(proof){ctx.globalAlpha=0.2;ctx.font=`${w*0.08}px Arial`;ctx.textAlign="center";ctx.fillText("PROOF ONLY",w/2,h/2);}const a=document.createElement('a');a.href=c.toDataURL();a.download=`${proof?"proof":"prod"}_${idx+1}.png`;a.click();}
+downloadProofBtn.onclick=()=>exportSheet(currentSheetIndex,true);
+downloadAllProofsBtn.onclick=()=>{for(let i=0;i<totalSheets;i++)exportSheet(i,true);};
+exportProdBtn.onclick=()=>exportSheet(currentSheetIndex,false);
+exportAllProdBtn.onclick=()=>{for(let i=0;i<totalSheets;i++)exportSheet(i,false);};
 
-const prevSheetBtn = document.getElementById('prevSheetBtn');
-const nextSheetBtn = document.getElementById('nextSheetBtn');
-const sheetIndicator = document.getElementById('sheetIndicator');
-const sheetNote = document.getElementById('sheetNote');
+/* order + staff unlock */
+placeOrderBtn.onclick=()=>{orderPlaced=true;afterOrder.style.display="block";wmEl.style.display="grid";alert("Order placed. Staff must unlock for production export.");}
+staffUnlockBtn.onclick=()=>{const STAFF_PIN="4312";if(staffPinInput.value.trim()===STAFF_PIN){staffMode=true;exportProdBtn.disabled=false;exportAllProdBtn.disabled=false;staffMsg.textContent="✅ Staff mode enabled.";staffMsg.style.color="var(--accent)";wmEl.style.display="none";}else{staffMsg.textContent="❌ Incorrect PIN.";staffMsg.style.color="var(--danger)";}}
 
-/* ===== Derived ===== */
-function sheetMm(){ const s=SHEETS[sheetKey].mm; return landscape?{w:s.h,h:s.w}:s; }
-function mmToPreview(mm){ return Math.round(mm*previewScale); }
-function getItem(id){ return items.find(i=>i.id===id); }
-
-/* ===== UI Build ===== */
-function renderSheetButtons(){
-  sheetButtons.innerHTML='';
-  Object.keys(SHEETS).forEach(k=>{
-    const b=document.createElement('button');
-    b.className='chip'+(sheetKey===k?' active':'');
-    b.textContent = (k==='ROLL'?'ROLL 33×100':k);
-    b.onclick=()=>{ sheetKey=k; computePrice(); currentSheetIndex=0; render(); };
-    sheetButtons.appendChild(b);
-  });
-}
-function updateDimLabel(){
-  const s=sheetMm();
-  dimLabel.textContent=`${s.w} × ${s.h} mm`;
-  orientBtn.textContent=landscape?'Landscape':'Portrait';
-}
-orientBtn.onclick=()=>{ if(orderPlaced && !staffMode) return alert('Editing is locked after order placement. Staff can unlock.'); landscape=!landscape; computePrice(); render();}
-
-/* ===== Upload / drag / paste ===== */
-uploadBtn.onclick=()=> fileInput.click();
-fileInput.onchange=(e)=>{ if(e.target.files) addFiles(e.target.files); };
-
-['dragenter','dragover'].forEach(ev=>drop.addEventListener(ev, e=>{ e.preventDefault(); drop.classList.add('drag'); }));
-['dragleave','dragend','drop'].forEach(ev=>drop.addEventListener(ev, e=> drop.classList.remove('drag')));
-drop.addEventListener('drop', e=>{ e.preventDefault(); if(e.dataTransfer?.files?.length) addFiles(e.dataTransfer.files); });
-window.addEventListener('paste', async (e)=>{
-  const its=e.clipboardData?.items||[]; const fs=[];
-  for(const it of its){ if(it.kind==='file'){ const f=it.getAsFile(); if(f) fs.push(f); } }
-  if(fs.length){ e.preventDefault(); addFiles(fs); }
-});
-resetBtn.onclick=()=>{ if(orderPlaced && !staffMode) return alert('Order placed. Staff can reset.'); items=[]; activeId=null; currentSheetIndex=0; render(); }
-
-/* ===== Add images ===== */
-async function addFiles(files){
-  if(orderPlaced && !staffMode) return alert('Order placed. Editing is locked.');
-  const toLoad=Array.from(files).filter(f=>/image\//.test(f.type)||/\.svg$/i.test(f.name));
-  for(const f of toLoad){
-    const url=URL.createObjectURL(f);
-    await new Promise((res,rej)=>{
-      const img=new Image();
-      img.onload=()=>{
-        const wMm=Math.max(40,(img.width/DPI)*MM_PER_INCH);
-        const hMm=wMm*(img.height/img.width);
-        items.push({id:uid(),name:f.name,src:url,img,xMm:5,yMm:5,wMm,hMm,mirrored:false,sheet:0,rotated:false});
-        res(); render();
-      };
-      img.onerror=rej; img.src=url;
-    });
-  }
-}
-
-/* ===== Selection & form ===== */
-function showSelection(it){
-  selectionPanel.style.display = it?'block':'none';
-  if(!it) return;
-  wField.value=mmToCm(it.wMm).toFixed(1);
-  hField.value=mmToCm(it.hMm).toFixed(1);
-  xField.value=mmToCm(it.xMm).toFixed(1);
-  yField.value=mmToCm(it.yMm).toFixed(1);
-}
-[wField,hField,xField,yField].forEach(el=>{
-  el.addEventListener('input', ()=>{
-    if(orderPlaced && !staffMode) return (el.value = el.value);
-    const it=getItem(activeId); if(!it) return;
-    const s=sheetMm(); const aspect=it.hMm/it.wMm;
-    let wMm=cmToMm(parseFloat(wField.value||'0'));
-    let hMm=cmToMm(parseFloat(hField.value||'0'));
-    if(el===wField && lockAspect.checked) hMm=Math.max(5,wMm*aspect);
-    if(el===hField && lockAspect.checked) wMm=Math.max(5,hMm/aspect);
-    it.wMm=clamp(wMm,5,s.w); it.hMm=clamp(hMm,5,s.h);
-    it.xMm=clamp(cmToMm(parseFloat(xField.value||'0')),0,s.w-it.wMm);
-    it.yMm=clamp(cmToMm(parseFloat(yField.value||'0')),0,s.h-it.hMm);
-    render();
-  });
-});
-mirrorBtn.onclick=()=>{ const it=getItem(activeId); if(!it) return; if(orderPlaced && !staffMode) return alert('Locked after order'); it.mirrored=!it.mirrored; render(); }
-deleteBtn.onclick=()=>{ if(orderPlaced && !staffMode) return alert('Locked after order'); items=items.filter(i=>i.id!==activeId); activeId=null; render(); }
-
-/* ===== Dragging ===== */
-let drag=null; // {id,offX,offY}
-function onPointerDown(e,it){
-  if(orderPlaced && !staffMode) return;
-  const r=drop.getBoundingClientRect();
-  drag={id:it.id,offX:e.clientX-r.left-mmToPreview(it.xMm),offY:e.clientY-r.top-mmToPreview(it.yMm)};
-  select(it.id);
-}
-function onPointerMove(e){
-  if(!drag) return;
-  const it=getItem(drag.id); if(!it) return;
-  if(it.sheet!==currentSheetIndex) return;
-  const s=sheetMm(); const r=drop.getBoundingClientRect();
-  const mx=e.clientX-r.left, my=e.clientY-r.top;
-  it.xMm=clamp((mx-drag.offX)/previewScale,0,s.w-it.wMm);
-  it.yMm=clamp((my-drag.offY)/previewScale,0,s.h-it.hMm);
-  render();
-}
-function onPointerUp(){ drag=null; }
-drop.addEventListener('pointermove', onPointerMove); window.addEventListener('pointerup', onPointerUp);
-drop.addEventListener('click', ()=> deselect());
-
-/* ===== Keyboard nudge ===== */
-window.addEventListener('keydown', e=>{
-  if(!activeId) return;
-  if(orderPlaced && !staffMode) return;
-  const it=getItem(activeId); if(!it) return; if(it.sheet!==currentSheetIndex) return;
-  const s=sheetMm(); const step=e.shiftKey?5:1;
-  if(['ArrowLeft','ArrowRight','ArrowUp','ArrowDown'].includes(e.key)) e.preventDefault();
-  if(e.key==='ArrowLeft') it.xMm=clamp(it.xMm-step,0,s.w-it.wMm);
-  if(e.key==='ArrowRight') it.xMm=clamp(it.xMm+step,0,s.w-it.wMm);
-  if(e.key==='ArrowUp') it.yMm=clamp(it.yMm-step,0,s.h-it.hMm);
-  if(e.key==='ArrowDown') it.yMm=clamp(it.yMm+step,0,s.h-it.hMm);
-  render();
-});
-
-/* ===== MaxRects Bin Packer ===== */
-class MaxRectsBin {
-  constructor(width, height){
-    this.width = width; this.height = height;
-    this.free = [{x:0,y:0,w:width,h:height}];
-    this.used = [];
-  }
-  insert(w,h,allowRotate=true){
-    let bestNode=null, bestShort=Infinity, bestLong=Infinity, rotated=false;
-    const tryPlace=(rw,rh,rot)=>{
-      for(const r of this.free){
-        if(rw<=r.w && rh<=r.h){
-          const leftoverH = Math.abs(r.w-rw), leftoverV = Math.abs(r.h-rh);
-          const shortSide = Math.min(leftoverH,leftoverV);
-          const longSide = Math.max(leftoverH,leftoverV);
-          if(shortSide < bestShort || (shortSide===bestShort && longSide<bestLong)){
-            bestShort=shortSide; bestLong=longSide; bestNode={x:r.x,y:r.y,w:rw,h:rh}; rotated=rot;
-          }
-        }
-      }
-    };
-    tryPlace(w,h,false);
-    if(allowRotate) tryPlace(h,w,true);
-    if(!bestNode) return null;
-
-    this.place(bestNode);
-    return {...bestNode, rotated};
-  }
-  place(node){
-    const out=[];
-    for(const r of this.free){
-      if(!this.intersect(node,r)){ out.push(r); continue; }
-      // split r into up to 4 new rects
-      if(node.x > r.x && node.x < r.x + r.w){
-        out.push({x:r.x, y:r.y, w:node.x - r.x, h:r.h});
-        r = {x:node.x, y:r.y, w:r.w - (node.x - r.x), h:r.h};
-      }
-      if(node.x + node.w < r.x + r.w){
-        out.push({x:node.x + node.w, y:r.y, w:(r.x + r.w) - (node.x + node.w), h:r.h});
-        r = {x:r.x, y:r.y, w:node.x + node.w - r.x, h:r.h};
-      }
-      if(node.y > r.y && node.y < r.y + r.h){
-        out.push({x:r.x, y:r.y, w:r.w, h:node.y - r.y});
-        r = {x:r.x, y:node.y, w:r.w, h:r.h - (node.y - r.y)};
-      }
-      if(node.y + node.h < r.y + r.h){
-        out.push({x:r.x, y:node.y + node.h, w:r.w, h:(r.y + r.h) - (node.y + node.h)});
-      }
-    }
-    this.free = out.filter(fr => fr.w>0 && fr.h>0);
-    this.prune();
-    this.used.push(node);
-  }
-  intersect(a,b){ return !(a.x>=b.x+b.w || a.x+a.w<=b.x || a.y>=b.y+b.h || a.y+a.h<=b.y); }
-  prune(){
-    // remove contained rects
-    for(let i=0;i<this.free.length;i++){
-      for(let j=i+1;j<this.free.length;j++){
-        const A=this.free[i], B=this.free[j];
-        if(this.containedIn(A,B)){ this.free.splice(i,1); i--; break; }
-        if(this.containedIn(B,A)){ this.free.splice(j,1); j--; }
-      }
-    }
-  }
-  containedIn(a,b){ return a.x>=b.x && a.y>=b.y && a.x+a.w<=b.x+b.w && a.y+a.h<=b.y+b.h; }
-}
-
-/* ===== Auto-pack across multiple sheets ===== */
-autoPackBtn.onclick = () => {
-  if (!items.length) return;
-  const s = sheetMm();
-  const gutter = Math.max(0, parseFloat(gutterMmEl.value||'0'));
-  const allowRotate = !!allowRotateEl.checked;
-
-  // sort by area desc
-  const toPlace = [...items].sort((a,b)=> (b.wMm*b.hMm) - (a.wMm*a.hMm));
-
-  // clear sheet indices
-  items.forEach(it=>{ it.sheet=0; });
-
-  const sheets = [];
-  let bin = new MaxRectsBin(s.w, s.h);
-  sheets.push(bin);
-
-  for(const it of toPlace){
-    const W = it.wMm + gutter;
-    const H = it.hMm + gutter;
-    let placed = bin.insert(W, H, allowRotate);
-    if(!placed){
-      bin = new MaxRectsBin(s.w, s.h);
-      sheets.push(bin);
-      placed = bin.insert(W, H, allowRotate);
-      if(!placed){ alert(`Item "${it.name}" is too large for the sheet.`); return; }
-    }
-    // convert back to image box (remove half-gutter around)
-    const rot = placed.rotated;
-    const realW = rot ? it.hMm : it.wMm;
-    const realH = rot ? it.wMm : it.hMm;
-    it.rotated = rot;
-    it.sheet = sheets.length - 1;
-    it.xMm = placed.x + gutter/2;
-    it.yMm = placed.y + gutter/2;
-    it.wMm = realW;
-    it.hMm = realH;
-  }
-
-  totalSheets = sheets.length;
-  currentSheetIndex = 0;
-  sheetNote.textContent = totalSheets>1 ? `Auto-packed into ${totalSheets} sheets` : '';
-  render();
-};
-
-/* ===== Proof / Production export (single sheet or all) ===== */
-downloadProofBtn.onclick=()=> exportSheet(currentSheetIndex,'proof');
-downloadAllProofsBtn.onclick=()=> exportAll('proof');
-exportProdBtn.onclick=()=> exportSheet(currentSheetIndex,'prod');
-exportAllProdBtn.onclick=()=> exportAll('prod');
-
-function exportAll(kind){
-  for(let i=0;i<totalSheets;i++) exportSheet(i, kind, /*silent*/ true);
-  if(kind==='proof') alert(`Saved ${totalSheets} proof PNGs.`);
-  else alert(`Saved ${totalSheets} production PNGs.`);
-}
-
-function exportSheet(sheetIdx, kind, silent=false){
-  const s=sheetMm();
-  const wPx = kind==='prod' ? Math.max(1,mmToPxPrint(s.w)) : Math.max(1,mmToPxProof(s.w));
-  const hPx = kind==='prod' ? Math.max(1,mmToPxPrint(s.h)) : Math.max(1,mmToPxProof(s.h));
-  const c=document.createElement('canvas'); c.width=wPx; c.height=hPx;
-  const ctx=c.getContext('2d'); ctx.clearRect(0,0,wPx,hPx);
-
-  const onSheet = items.filter(it=>it.sheet===sheetIdx);
-  for(const it of onSheet){
-    const x = Math.round((it.xMm/s.w)*wPx);
-    const y = Math.round((it.yMm/s.h)*hPx);
-    const w = Math.round((it.wMm/s.w)*wPx);
-    const h = Math.round((it.hMm/s.h)*hPx);
-    ctx.save();
-    if(it.mirrored){ ctx.translate(x+w/2,y+h/2); ctx.scale(-1,1); ctx.translate(-(x+w/2),-(y+h/2)); }
-    ctx.drawImage(it.img,x,y,w,h);
-    ctx.restore();
-  }
-
-  if(kind==='proof'){
-    ctx.save();
-    ctx.globalAlpha=0.20;
-    ctx.translate(wPx/2,hPx/2);
-    ctx.rotate(-Math.PI/8);
-    ctx.fillStyle='#ffffff';
-    ctx.font=`${Math.floor(wPx*0.08)}px system-ui,Arial`;
-    ctx.textAlign='center';
-    ctx.fillText('PROOF ONLY',0,0);
-    ctx.restore();
-  }
-
-  const a=document.createElement('a');
-  a.href=c.toDataURL('image/png');
-  a.download=`${kind==='prod'?'production':'proof'}_sheet${sheetIdx+1}_${sheetKey}_${landscape?'land':'port'}.png`;
-  a.click();
-  if(!silent){ /* no-op */ }
-}
-
-/* ===== Order & Staff ===== */
-function computePrice(){
-  const base = SHEETS[sheetKey].price;
-  const qty = Number(qtyEl.value||1);
-  priceLine.textContent = `${sheetKey==='ROLL'?'Roll 33×100 cm':sheetKey} £${base.toFixed(2)} • Qty ${qty} — Est: £${(base*qty).toFixed(2)}`;
-}
-qtyEl.addEventListener('input', computePrice); finishEl.addEventListener('change', computePrice);
-computePrice();
-
-placeOrderBtn.onclick=()=>{
-  if(items.length===0) return alert('Add at least one design to place an order.');
-  if(!custName.value || !custEmail.value) return alert('Name and email are required.');
-  orderPlaced=true; orderId=uid();
-  localStorage.setItem('dtf_order', JSON.stringify({
-    id:orderId,name:custName.value,email:custEmail.value,qty:qtyEl.value,finish:finishEl.value,notes:notes.value,
-    sheet:sheetKey,landscape,ts:Date.now(), sheets: totalSheets
-  }));
-  afterOrder.style.display='block';
-  wmEl.style.display='grid';
-  orderStatus.textContent=`Order #${orderId.slice(-6)} placed • awaiting staff`;
-  exportProdBtn.disabled=true; exportAllProdBtn.disabled=true;
-  hint.textContent='Order placed — editing locked (staff can unlock)';
-  alert('Order placed. You can download proofs. Staff will finalize your print.');
-};
-
-staffUnlockBtn.onclick=()=>{
-  const pin = prompt('Staff PIN:');
-  // CHANGE THIS before publishing!
-  const STAFF_PIN='4312';
-  if(pin===STAFF_PIN){
-    staffMode=true;
-    exportProdBtn.disabled=false; exportAllProdBtn.disabled=false;
-    orderStatus.textContent=`Order #${orderId?orderId.slice(-6):'—'} • staff unlocked`;
-    hint.textContent='Staff mode — editing allowed';
-    wmEl.style.display='none';
-    alert('Staff mode enabled.');
-  }else if(pin!==null){
-    alert('Incorrect PIN.');
-  }
-};
-
-/* ===== Sheet navigation ===== */
-prevSheetBtn.onclick = ()=>{ if(currentSheetIndex>0){ currentSheetIndex--; render(); } };
-nextSheetBtn.onclick = ()=>{ if(currentSheetIndex<totalSheets-1){ currentSheetIndex++; render(); } };
-
-/* ===== Render ===== */
-function select(id){ activeId=id; render(); }
-function deselect(){ activeId=null; render(); }
-
-function render(){
-  renderSheetButtons();
-  updateDimLabel();
-
-  // totalSheets recompute from items
-  totalSheets = Math.max(1, (items.length? (1 + Math.max(...items.map(i=>i.sheet||0))) : 1));
-  currentSheetIndex = clamp(currentSheetIndex, 0, totalSheets-1);
-  sheetIndicator.textContent = `Sheet ${currentSheetIndex+1} / ${totalSheets}`;
-
-  const s=sheetMm();
-  const w=mmToPreview(s.w), h=mmToPreview(s.h);
-  drop.style.width=w+'px'; drop.style.height=h+'px';
-
-  drop.querySelectorAll('img.item').forEach(n=>n.remove());
-  items.filter(it=>it.sheet===currentSheetIndex).forEach(it=>{
-    const el=document.createElement('img');
-    el.src=it.src; el.className='item'+(it.id===activeId?' active':'');
-    el.style.left=mmToPreview(it.xMm)+'px';
-    el.style.top =mmToPreview(it.yMm)+'px';
-    el.style.width=mmToPreview(it.wMm)+'px';
-    el.style.height=mmToPreview(it.hMm)+'px';
-    el.style.transform=`scaleX(${it.mirrored?-1:1})`;
-    el.style.transformOrigin='center';
-    if(!(orderPlaced && !staffMode)){
-      el.addEventListener('pointerdown',e=> onPointerDown(e,it));
-    }
-    el.addEventListener('click',e=>{ e.stopPropagation(); select(it.id); });
-    drop.appendChild(el);
-  });
-
-  showSelection(getItem(activeId));
-  wmEl.style.display = (orderPlaced && !staffMode) ? 'grid' : 'none';
-  hint.style.display = items.filter(it=>it.sheet===currentSheetIndex).length? 'none' : 'block';
-}
-
-/* init */
-render();
-</script>
-</body>
-</html>
+/* render */
+function render(){const s=sheetMm();drop.style.width=(s.w*2)+"px";drop.style.height=(s.h*2)+"px";drop.querySelectorAll("img").forEach(n=>n.remove());items.filter(it=>it.sheet===currentSheetIndex).forEach(it
