@@ -1,0 +1,373 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>DTF Gang Sheet Builder (A3/A4 • 300 DPI)</title>
+<style>
+  :root {
+    --bg: #f8fafc;
+    --panel: #ffffff;
+    --text: #0f172a;
+    --muted: #475569;
+    --border: #e2e8f0;
+    --accent: #0f172a;
+  }
+  * { box-sizing: border-box; }
+  body { margin:0; font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, "Helvetica Neue", Arial;
+         color: var(--text); background: var(--bg); }
+  header { position: sticky; top:0; z-index:10; backdrop-filter: saturate(1.2) blur(6px);
+           background: rgba(255,255,255,.85); border-bottom:1px solid var(--border); }
+  header .inner { max-width: 1120px; margin: 0 auto; padding: 12px 16px; display:flex; gap:12px; align-items:center; }
+  .title { font-weight: 800; font-size: 18px; }
+  .subtle { color: var(--muted); font-size: 12px; }
+
+  main { max-width: 1120px; margin: 0 auto; padding: 16px; display:grid; grid-template-columns: 360px 1fr; gap:16px; }
+  @media (max-width: 900px) { main { grid-template-columns: 1fr; } }
+
+  .panel { background: var(--panel); border:1px solid var(--border); border-radius: 14px; padding: 12px; box-shadow: 0 1px 2px rgba(0,0,0,.04); }
+  .panel h3 { margin:0 0 8px; font-size: 14px; font-weight: 700; }
+  .row { display:flex; gap:8px; flex-wrap:wrap; align-items:center; }
+  .btn { appearance:none; border:1px solid var(--border); background:#fff; padding:8px 12px; border-radius: 10px; cursor:pointer; font-weight:600; }
+  .btn:hover { background:#f8fafc; }
+  .btn.danger { color:#b91c1c; }
+  .chip { padding:6px 10px; border:1px solid var(--border); border-radius: 999px; background:#fff; cursor:pointer; }
+  .chip.active { background: var(--accent); color:#fff; border-color: var(--accent); }
+  .small { font-size: 12px; color: var(--muted); }
+  .grid { display:grid; grid-template-columns: 1fr 1fr; gap:8px; }
+  .label { font-size:11px; color:var(--muted); margin-bottom:4px; }
+  .input { width:100%; padding:8px 10px; border:1px solid var(--border); border-radius:10px; font:inherit; }
+  .line { height:1px; background:var(--border); margin:8px 0; }
+
+  .editorWrap { background:#fff; border:1px solid var(--border); border-radius:14px; padding:12px; }
+  .editorHead { display:flex; justify-content:space-between; margin-bottom:8px; }
+  .drop { position:relative; margin: 0 auto; background:#fff; border:1px dashed #cbd5e1; border-radius:10px; overflow:hidden; }
+  .drop.drag { background:#f1f5f9; border-color:#94a3b8; }
+  .item { position:absolute; cursor:grab; }
+  .item.active { outline:2px solid #2563eb; }
+  .hint { position:absolute; inset:auto 8px 8px auto; background:rgba(15,23,42,.8); color:#fff; padding:6px 8px; border-radius:8px; font-size:11px; }
+  .footer { padding: 10px 16px; text-align:center; color:var(--muted); font-size:12px; }
+</style>
+</head>
+<body>
+<header><div class="inner">
+  <div class="title">DTF Gang Sheet Builder</div>
+  <div class="subtle">A3/A4 • Upload → resize in cm → Export 300 DPI</div>
+</div></header>
+
+<main>
+  <!-- CONTROLS -->
+  <section class="panel">
+    <h3>Sheet</h3>
+    <div class="row" id="sheetButtons"></div>
+    <div class="row" style="margin-top:8px">
+      <button class="btn" id="orientBtn">Portrait</button>
+      <div class="small" id="dimLabel" style="margin-left:auto"></div>
+    </div>
+
+    <div class="line"></div>
+
+    <h3>Upload</h3>
+    <div class="row">
+      <button class="btn" id="uploadBtn">Upload images</button>
+      <input type="file" id="fileInput" accept="image/*,.svg" multiple hidden />
+      <button class="btn danger" id="resetBtn" style="margin-left:auto">Reset</button>
+    </div>
+    <div class="small" style="margin-top:6px">You can also drag & drop or paste (Ctrl/⌘+V). Best: PNG with transparency.</div>
+
+    <div class="line"></div>
+
+    <div id="selectionPanel" style="display:none">
+      <h3>Selection (size & position)</h3>
+      <div class="grid">
+        <div>
+          <div class="label">Width (cm)</div>
+          <input class="input" type="number" step="0.1" min="0.5" id="wField" />
+        </div>
+        <div>
+          <div class="label">Height (cm)</div>
+          <input class="input" type="number" step="0.1" min="0.5" id="hField" />
+        </div>
+        <div>
+          <div class="label">X (cm)</div>
+          <input class="input" type="number" step="0.1" id="xField" />
+        </div>
+        <div>
+          <div class="label">Y (cm)</div>
+          <input class="input" type="number" step="0.1" id="yField" />
+        </div>
+      </div>
+      <div class="row" style="margin-top:8px">
+        <label class="row small"><input type="checkbox" id="lockAspect" checked style="margin-right:6px">Lock aspect</label>
+        <button class="btn" id="mirrorBtn" style="margin-left:auto">Mirror</button>
+        <button class="btn danger" id="deleteBtn">Delete</button>
+      </div>
+    </div>
+
+    <div class="line"></div>
+
+    <h3>Export</h3>
+    <button class="btn" id="exportBtn">PNG @300 DPI (transparent)</button>
+    <div class="small" style="margin-top:6px">Open in your RIP; it will build the white underbase.</div>
+  </section>
+
+  <!-- EDITOR -->
+  <section class="editorWrap">
+    <div class="editorHead">
+      <div class="title" style="font-size:14px;">Editor</div>
+      <div class="subtle">Drag & drop files here • Click image to select • Arrow keys to nudge</div>
+    </div>
+    <div id="drop" class="drop">
+      <div class="hint">Drop images here</div>
+    </div>
+  </section>
+</main>
+
+<div class="footer">A4 export 2480×3508 px • A3 export 3508×4961 px (both @300 DPI)</div>
+
+<script>
+/* ===== Constants ===== */
+const MM_PER_INCH = 25.4;
+const DPI = 300;
+const PX_PER_MM = DPI / MM_PER_INCH;
+
+const SHEETS = {
+  A4: { label: "A4 (210 × 297 mm)", mm: { w:210, h:297 } },
+  A3: { label: "A3 (297 × 420 mm)", mm: { w:297, h:420 } },
+};
+
+function mmToPxPrint(mm){ return Math.round(mm * PX_PER_MM); }
+function mmToCm(mm){ return mm/10; }
+function cmToMm(cm){ return cm*10; }
+
+/* ===== State ===== */
+let sheetKey = 'A3';
+let landscape = false;
+let items = []; // {id,name,src,img,xMm,yMm,wMm,hMm,mirrored}
+let activeId = null;
+let previewScale = 2; // pixels per mm in preview
+
+/* ===== Elements ===== */
+const drop = document.getElementById('drop');
+const uploadBtn = document.getElementById('uploadBtn');
+const fileInput = document.getElementById('fileInput');
+const resetBtn = document.getElementById('resetBtn');
+const exportBtn = document.getElementById('exportBtn');
+const orientBtn = document.getElementById('orientBtn');
+const sheetButtons = document.getElementById('sheetButtons');
+const dimLabel = document.getElementById('dimLabel');
+
+const selectionPanel = document.getElementById('selectionPanel');
+const wField = document.getElementById('wField');
+const hField = document.getElementById('hField');
+const xField = document.getElementById('xField');
+const yField = document.getElementById('yField');
+const lockAspect = document.getElementById('lockAspect');
+const mirrorBtn = document.getElementById('mirrorBtn');
+const deleteBtn = document.getElementById('deleteBtn');
+
+/* ===== Utilities ===== */
+function sheetMm(){ const s=SHEETS[sheetKey].mm; return landscape?{w:s.h,h:s.w}:s; }
+function mmToPreview(mm){ return Math.round(mm * previewScale); }
+function getItem(id){ return items.find(i=>i.id===id); }
+function clamp(v,min,max){ return Math.max(min, Math.min(max, v)); }
+function select(id){ activeId = id; render(); }
+function deselect(){ activeId = null; render(); }
+
+/* ===== UI Setup ===== */
+function renderSheetButtons(){
+  sheetButtons.innerHTML = '';
+  Object.keys(SHEETS).forEach(k=>{
+    const b = document.createElement('button');
+    b.className = 'chip' + (sheetKey===k?' active':'');
+    b.textContent = k;
+    b.onclick = ()=>{ sheetKey=k; render(); };
+    sheetButtons.appendChild(b);
+  });
+}
+orientBtn.onclick = ()=>{ landscape = !landscape; render(); };
+
+function updateDimLabel(){
+  const s = sheetMm();
+  dimLabel.textContent = `${s.w} × ${s.h} mm`;
+  orientBtn.textContent = landscape ? 'Landscape' : 'Portrait';
+}
+
+/* ===== Upload/paste/drag ===== */
+uploadBtn.onclick = ()=> fileInput.click();
+fileInput.onchange = (e)=> { if(e.target.files) addFiles(e.target.files); };
+
+window.addEventListener('paste', async (e)=>{
+  const items = e.clipboardData?.items || [];
+  const files = [];
+  for (const it of items) { if (it.kind === 'file') { const f = it.getAsFile(); if (f) files.push(f); } }
+  if (files.length) { e.preventDefault(); addFiles(files); }
+});
+
+['dragenter','dragover'].forEach(ev=>{
+  drop.addEventListener(ev, e=>{ e.preventDefault(); drop.classList.add('drag'); });
+});
+['dragleave','dragend','drop'].forEach(ev=>{
+  drop.addEventListener(ev, e=> drop.classList.remove('drag'));
+});
+drop.addEventListener('drop', (e)=>{
+  e.preventDefault();
+  if (e.dataTransfer?.files?.length) addFiles(e.dataTransfer.files);
+});
+
+/* ===== Add images ===== */
+async function addFiles(files){
+  const toLoad = Array.from(files).filter(f=>/image\//.test(f.type) || /\.svg$/i.test(f.name));
+  for (const f of toLoad){
+    const url = URL.createObjectURL(f);
+    await new Promise((res,rej)=>{
+      const img = new Image();
+      img.onload = ()=>{
+        const wMm = Math.max(40, (img.width / DPI) * MM_PER_INCH); // place at >=40 mm wide
+        const hMm = wMm * (img.height / img.width);
+        items.push({ id: `${Date.now()}_${Math.random().toString(36).slice(2,7)}`, name:f.name, src:url, img,
+          xMm: 5, yMm:5, wMm, hMm, mirrored:false });
+        res();
+        render();
+      };
+      img.onerror = rej;
+      img.src = url;
+    });
+  }
+}
+
+/* ===== Export 300 DPI PNG ===== */
+exportBtn.onclick = ()=>{
+  const s = sheetMm();
+  const wPx = mmToPxPrint(s.w), hPx = mmToPxPrint(s.h);
+  const c = document.createElement('canvas'); c.width = wPx; c.height = hPx;
+  const ctx = c.getContext('2d', { willReadFrequently:false });
+  ctx.clearRect(0,0,wPx,hPx);
+  for (const it of items){
+    const x = mmToPxPrint(it.xMm), y = mmToPxPrint(it.yMm);
+    const w = mmToPxPrint(it.wMm), h = mmToPxPrint(it.hMm);
+    ctx.save();
+    if (it.mirrored){
+      ctx.translate(x + w/2, y + h/2);
+      ctx.scale(-1, 1);
+      ctx.translate(-(x + w/2), -(y + h/2));
+    }
+    ctx.drawImage(it.img, x, y, w, h);
+    ctx.restore();
+  }
+  const a = document.createElement('a');
+  a.href = c.toDataURL('image/png');
+  a.download = `gangsheet_${sheetKey}_${landscape?'land':'port'}_300dpi.png`;
+  a.click();
+};
+
+/* ===== Selection form handlers ===== */
+function showSelection(it){
+  selectionPanel.style.display = it ? 'block' : 'none';
+  if (!it) return;
+  wField.value = mmToCm(it.wMm).toFixed(1);
+  hField.value = mmToCm(it.hMm).toFixed(1);
+  xField.value = mmToCm(it.xMm).toFixed(1);
+  yField.value = mmToCm(it.yMm).toFixed(1);
+}
+[wField, hField, xField, yField].forEach(el=>{
+  el.addEventListener('input', ()=>{
+    const it = getItem(activeId); if (!it) return;
+    const s = sheetMm();
+    const aspect = it.hMm / it.wMm;
+    const wCm = parseFloat(wField.value||'0');
+    const hCm = parseFloat(hField.value||'0');
+    const xCm = parseFloat(xField.value||'0');
+    const yCm = parseFloat(yField.value||'0');
+
+    let wMm = cmToMm(wCm);
+    let hMm = cmToMm(hCm);
+    if (el===wField && lockAspect.checked) hMm = Math.max(5, wMm*aspect);
+    if (el===hField && lockAspect.checked) wMm = Math.max(5, hMm/aspect);
+    it.wMm = clamp(wMm, 5, s.w);
+    it.hMm = clamp(hMm, 5, s.h);
+    it.xMm = clamp(cmToMm(xCm), 0, s.w - it.wMm);
+    it.yMm = clamp(cmToMm(yCm), 0, s.h - it.hMm);
+    render();
+  });
+});
+mirrorBtn.onclick = ()=>{ const it=getItem(activeId); if (it){ it.mirrored=!it.mirrored; render(); } };
+deleteBtn.onclick = ()=>{ items = items.filter(i=>i.id!==activeId); activeId=null; render(); };
+resetBtn.onclick = ()=>{ items=[]; activeId=null; render(); };
+
+/* ===== Dragging items ===== */
+let drag = null; // {id, offX, offY}
+function onPointerDown(e, it){
+  const rect = drop.getBoundingClientRect();
+  const mouseX = e.clientX - rect.left, mouseY = e.clientY - rect.top;
+  drag = { id: it.id, offX: mouseX - mmToPreview(it.xMm), offY: mouseY - mmToPreview(it.yMm) };
+  select(it.id);
+}
+function onPointerMove(e){
+  if (!drag) return;
+  const it = getItem(drag.id); if (!it) return;
+  const s = sheetMm();
+  const rect = drop.getBoundingClientRect();
+  const mouseX = e.clientX - rect.left, mouseY = e.clientY - rect.top;
+  const newX = (mouseX - drag.offX) / previewScale;
+  const newY = (mouseY - drag.offY) / previewScale;
+  it.xMm = clamp(newX, 0, s.w - it.wMm);
+  it.yMm = clamp(newY, 0, s.h - it.hMm);
+  render(); // smooth
+}
+function onPointerUp(){ drag=null; }
+
+/* ===== Keyboard nudge ===== */
+window.addEventListener('keydown', (e)=>{
+  if (!activeId) return;
+  const it = getItem(activeId); if (!it) return;
+  const s = sheetMm();
+  const step = e.shiftKey ? 5 : 1;
+  if (['ArrowLeft','ArrowRight','ArrowUp','ArrowDown'].includes(e.key)) e.preventDefault();
+  if (e.key==='ArrowLeft')  it.xMm = clamp(it.xMm - step, 0, s.w - it.wMm);
+  if (e.key==='ArrowRight') it.xMm = clamp(it.xMm + step, 0, s.w - it.wMm);
+  if (e.key==='ArrowUp')    it.yMm = clamp(it.yMm - step, 0, s.h - it.hMm);
+  if (e.key==='ArrowDown')  it.yMm = clamp(it.yMm + step, 0, s.h - it.hMm);
+  render();
+});
+
+/* ===== Render ===== */
+function render(){
+  renderSheetButtons();
+  updateDimLabel();
+
+  // compute preview size
+  const s = sheetMm();
+  const w = mmToPreview(s.w), h = mmToPreview(s.h);
+  drop.style.width = w + 'px';
+  drop.style.height = h + 'px';
+
+  // draw items
+  drop.querySelectorAll('img.item').forEach(n=>n.remove());
+  items.forEach(it=>{
+    const im = document.createElement('img');
+    im.src = it.src;
+    im.className = 'item' + (it.id===activeId ? ' active' : '');
+    im.style.left = mmToPreview(it.xMm) + 'px';
+    im.style.top  = mmToPreview(it.yMm) + 'px';
+    im.style.width  = mmToPreview(it.wMm) + 'px';
+    im.style.height = mmToPreview(it.hMm) + 'px';
+    im.style.transform = `scaleX(${it.mirrored?-1:1})`;
+    im.style.transformOrigin = 'center';
+    im.addEventListener('pointerdown', (e)=> onPointerDown(e, it));
+    im.addEventListener('click', (e)=> { e.stopPropagation(); select(it.id); });
+    drop.appendChild(im);
+  });
+
+  // selection form
+  showSelection(getItem(activeId));
+}
+drop.addEventListener('pointermove', onPointerMove);
+window.addEventListener('pointerup', onPointerUp);
+drop.addEventListener('click', ()=> deselect());
+
+/* init */
+render();
+</script>
+</body>
+</html>
