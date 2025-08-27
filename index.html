@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1"/>
-<title>DTF Gang Sheet Builder — Proof/Order/Staff Export + Roll + Auto-pack</title>
+<title>DTF Gang Sheet — MaxRects & Multi-Sheet (Proof/Order/Staff)</title>
 <style>
   :root{
     --bg:#0b1220; --panel:#0f172a; --muted:#93a4c2; --text:#e6eefc; --brand:#7c3aed; --brand-2:#06b6d4;
@@ -13,11 +13,11 @@
   body{margin:0;font:14px/1.4 Inter,ui-sans-serif,system-ui,Segoe UI,Roboto,Helvetica,Arial;color:var(--text);
        background:linear-gradient(180deg,#0b1220,#0b1220 280px,#0e1628 100%)}
   header{position:sticky;top:0;z-index:10;border-bottom:1px solid var(--border);background:rgba(11,18,32,.7);backdrop-filter:saturate(1.2) blur(8px)}
-  header .inner{max-width:1200px;margin:0 auto;padding:14px 16px;display:flex;gap:12px;align-items:center}
+  header .inner{max-width:1240px;margin:0 auto;padding:14px 16px;display:flex;gap:12px;align-items:center}
   .title{font-weight:800;font-size:18px}
   .badge{background:linear-gradient(90deg,var(--brand),var(--brand-2));padding:6px 10px;border-radius:999px;font-weight:700;font-size:12px}
   .subtle{color:var(--muted);font-size:12px}
-  main{max-width:1200px;margin:0 auto;padding:18px;display:grid;grid-template-columns:380px 1fr 320px;gap:16px}
+  main{max-width:1240px;margin:0 auto;padding:18px;display:grid;grid-template-columns:380px 1fr 340px;gap:16px}
   @media (max-width:1100px){main{grid-template-columns:1fr}}
   .panel{background:linear-gradient(180deg,#0f172a,#0c1324);border:1px solid var(--border);border-radius:14px;padding:12px;box-shadow:0 3px 20px rgba(0,0,0,.2)}
   .panel h3{margin:0 0 8px;font-size:14px;font-weight:800}
@@ -46,16 +46,17 @@
         padding:7px 9px;border-radius:9px;font-size:11px}
   .footer{padding:14px 16px;text-align:center;color:var(--muted);font-size:12px}
 
-  /* watermark for proof */
   .wm{position:absolute;inset:0;pointer-events:none;display:grid;place-items:center;opacity:.18}
   .wm span{font-weight:800;font-size:48px;letter-spacing:.2em;color:#e2e8f0;mix-blend-mode:overlay}
+
+  .sheetbar{display:flex;align-items:center;gap:8px}
 </style>
 </head>
 <body>
 <header><div class="inner">
   <div class="badge">DTF Builder</div>
-  <div class="title">A3/A4 + Roll 33×100 cm</div>
-  <div class="subtle">Upload → resize (cm) → auto-pack → proof → staff export</div>
+  <div class="title">MaxRects Auto-Pack • Multi-Sheet</div>
+  <div class="subtle">Upload → size (cm) → pack → proof → staff export</div>
 </div></header>
 
 <main>
@@ -101,16 +102,18 @@
     <div class="row">
       <div class="label">Gutter (mm)</div>
       <input class="input" style="width:90px" type="number" id="gutterMm" min="0" step="1" value="5"/>
-      <button class="btn" id="autoPackBtn">Auto-pack (tight)</button>
-      <span class="small">Shelf FFD — good density, very fast</span>
+      <label class="row small"><input type="checkbox" id="allowRotate" checked style="margin-right:6px">Allow 90° rotation</label>
+      <button class="btn" id="autoPackBtn">Auto-pack (MaxRects)</button>
     </div>
+    <div class="small">Creates multiple sheets automatically if needed.</div>
 
     <div class="line"></div>
 
     <h3>Proof (customer)</h3>
     <div class="row">
-      <button class="btn" id="downloadProofBtn">Download Proof (watermarked)</button>
-      <span class="small">150 DPI PNG • not for print</span>
+      <button class="btn" id="downloadProofBtn">Download Proof (current sheet)</button>
+      <button class="btn" id="downloadAllProofsBtn">All Proofs</button>
+      <span class="small">150 DPI PNG • watermarked</span>
     </div>
   </section>
 
@@ -120,7 +123,13 @@
       <div style="font-weight:800">Editor</div>
       <div class="subtle">Drag & drop • Click image to select • Arrow keys to nudge</div>
     </div>
-    <div id="drop" class="drop">
+    <div class="sheetbar">
+      <button class="btn" id="prevSheetBtn">⟵</button>
+      <div class="pill" id="sheetIndicator">Sheet 1 / 1</div>
+      <button class="btn" id="nextSheetBtn">⟶</button>
+      <div class="small" id="sheetNote" style="margin-left:8px"></div>
+    </div>
+    <div id="drop" class="drop" style="margin-top:8px">
       <div id="wm" class="wm" style="display:none"><span>PROOF ONLY</span></div>
       <div class="hint" id="hint">Drop files here</div>
     </div>
@@ -156,14 +165,15 @@
         <button class="btn" id="staffUnlockBtn" title="Staff only">Staff unlock</button>
       </div>
       <div class="row" style="margin-top:8px">
-        <button class="btn" id="exportProdBtn" disabled>Export Production PNG @300 DPI</button>
-        <span class="small">Locked until staff unlock with PIN.</span>
+        <button class="btn" id="exportProdBtn" disabled>Export Production (current sheet) @300 DPI</button>
+        <button class="btn" id="exportAllProdBtn" disabled>Export ALL Sheets @300 DPI</button>
       </div>
+      <div class="small">Production exports require staff PIN. Proofs remain available to customers.</div>
     </div>
   </section>
 </main>
 
-<div class="footer">Proofs contain watermark (150 DPI). Production (300 DPI) requires staff PIN. Presets: A4, A3, Roll 33×100 cm.</div>
+<div class="footer">Proofs are 150 DPI + watermark. Production is 300 DPI (A4 2480×3508, A3 3508×4961, Roll 330×1000 mm). Multi-sheet packing via MaxRects.</div>
 
 <script>
 /* ===== Core constants / helpers ===== */
@@ -187,6 +197,8 @@ function uid(){ return `${Date.now()}_${Math.random().toString(36).slice(2,7)}`;
 /* ===== State ===== */
 let sheetKey='A3', landscape=false, items=[], activeId=null;
 let previewScale=2, orderPlaced=false, staffMode=false, orderId=null;
+let currentSheetIndex = 0; // preview page
+let totalSheets = 1;
 
 /* ===== Elements ===== */
 const drop = document.getElementById('drop');
@@ -209,11 +221,14 @@ const mirrorBtn = document.getElementById('mirrorBtn');
 const deleteBtn = document.getElementById('deleteBtn');
 
 const gutterMmEl = document.getElementById('gutterMm');
+const allowRotateEl = document.getElementById('allowRotate');
 const autoPackBtn = document.getElementById('autoPackBtn');
 
 const downloadProofBtn = document.getElementById('downloadProofBtn');
+const downloadAllProofsBtn = document.getElementById('downloadAllProofsBtn');
 const placeOrderBtn = document.getElementById('placeOrderBtn');
 const exportProdBtn = document.getElementById('exportProdBtn');
+const exportAllProdBtn = document.getElementById('exportAllProdBtn');
 const staffUnlockBtn = document.getElementById('staffUnlockBtn');
 const afterOrder = document.getElementById('afterOrder');
 const orderStatus = document.getElementById('orderStatus');
@@ -223,6 +238,11 @@ const priceLine = document.getElementById('priceLine');
 const custName = document.getElementById('custName');
 const custEmail = document.getElementById('custEmail');
 const notes = document.getElementById('notes');
+
+const prevSheetBtn = document.getElementById('prevSheetBtn');
+const nextSheetBtn = document.getElementById('nextSheetBtn');
+const sheetIndicator = document.getElementById('sheetIndicator');
+const sheetNote = document.getElementById('sheetNote');
 
 /* ===== Derived ===== */
 function sheetMm(){ const s=SHEETS[sheetKey].mm; return landscape?{w:s.h,h:s.w}:s; }
@@ -236,7 +256,7 @@ function renderSheetButtons(){
     const b=document.createElement('button');
     b.className='chip'+(sheetKey===k?' active':'');
     b.textContent = (k==='ROLL'?'ROLL 33×100':k);
-    b.onclick=()=>{ sheetKey=k; computePrice(); render(); };
+    b.onclick=()=>{ sheetKey=k; computePrice(); currentSheetIndex=0; render(); };
     sheetButtons.appendChild(b);
   });
 }
@@ -259,7 +279,7 @@ window.addEventListener('paste', async (e)=>{
   for(const it of its){ if(it.kind==='file'){ const f=it.getAsFile(); if(f) fs.push(f); } }
   if(fs.length){ e.preventDefault(); addFiles(fs); }
 });
-resetBtn.onclick=()=>{ if(orderPlaced && !staffMode) return alert('Order placed. Staff can reset.'); items=[]; activeId=null; render(); }
+resetBtn.onclick=()=>{ if(orderPlaced && !staffMode) return alert('Order placed. Staff can reset.'); items=[]; activeId=null; currentSheetIndex=0; render(); }
 
 /* ===== Add images ===== */
 async function addFiles(files){
@@ -272,7 +292,7 @@ async function addFiles(files){
       img.onload=()=>{
         const wMm=Math.max(40,(img.width/DPI)*MM_PER_INCH);
         const hMm=wMm*(img.height/img.width);
-        items.push({id:uid(),name:f.name,src:url,img,xMm:5,yMm:5,wMm,hMm,mirrored:false});
+        items.push({id:uid(),name:f.name,src:url,img,xMm:5,yMm:5,wMm,hMm,mirrored:false,sheet:0,rotated:false});
         res(); render();
       };
       img.onerror=rej; img.src=url;
@@ -291,7 +311,7 @@ function showSelection(it){
 }
 [wField,hField,xField,yField].forEach(el=>{
   el.addEventListener('input', ()=>{
-    if(orderPlaced && !staffMode) return (el.value = el.value); // prevent edits
+    if(orderPlaced && !staffMode) return (el.value = el.value);
     const it=getItem(activeId); if(!it) return;
     const s=sheetMm(); const aspect=it.hMm/it.wMm;
     let wMm=cmToMm(parseFloat(wField.value||'0'));
@@ -310,7 +330,7 @@ deleteBtn.onclick=()=>{ if(orderPlaced && !staffMode) return alert('Locked after
 /* ===== Dragging ===== */
 let drag=null; // {id,offX,offY}
 function onPointerDown(e,it){
-  if(orderPlaced && !staffMode) return; // lock
+  if(orderPlaced && !staffMode) return;
   const r=drop.getBoundingClientRect();
   drag={id:it.id,offX:e.clientX-r.left-mmToPreview(it.xMm),offY:e.clientY-r.top-mmToPreview(it.yMm)};
   select(it.id);
@@ -318,6 +338,7 @@ function onPointerDown(e,it){
 function onPointerMove(e){
   if(!drag) return;
   const it=getItem(drag.id); if(!it) return;
+  if(it.sheet!==currentSheetIndex) return;
   const s=sheetMm(); const r=drop.getBoundingClientRect();
   const mx=e.clientX-r.left, my=e.clientY-r.top;
   it.xMm=clamp((mx-drag.offX)/previewScale,0,s.w-it.wMm);
@@ -332,7 +353,8 @@ drop.addEventListener('click', ()=> deselect());
 window.addEventListener('keydown', e=>{
   if(!activeId) return;
   if(orderPlaced && !staffMode) return;
-  const it=getItem(activeId); if(!it) return; const s=sheetMm(); const step=e.shiftKey?5:1;
+  const it=getItem(activeId); if(!it) return; if(it.sheet!==currentSheetIndex) return;
+  const s=sheetMm(); const step=e.shiftKey?5:1;
   if(['ArrowLeft','ArrowRight','ArrowUp','ArrowDown'].includes(e.key)) e.preventDefault();
   if(e.key==='ArrowLeft') it.xMm=clamp(it.xMm-step,0,s.w-it.wMm);
   if(e.key==='ArrowRight') it.xMm=clamp(it.xMm+step,0,s.w-it.wMm);
@@ -341,42 +363,139 @@ window.addEventListener('keydown', e=>{
   render();
 });
 
-/* ===== Auto-pack (Shelf FFD with gutter) ===== */
+/* ===== MaxRects Bin Packer ===== */
+class MaxRectsBin {
+  constructor(width, height){
+    this.width = width; this.height = height;
+    this.free = [{x:0,y:0,w:width,h:height}];
+    this.used = [];
+  }
+  insert(w,h,allowRotate=true){
+    let bestNode=null, bestShort=Infinity, bestLong=Infinity, rotated=false;
+    const tryPlace=(rw,rh,rot)=>{
+      for(const r of this.free){
+        if(rw<=r.w && rh<=r.h){
+          const leftoverH = Math.abs(r.w-rw), leftoverV = Math.abs(r.h-rh);
+          const shortSide = Math.min(leftoverH,leftoverV);
+          const longSide = Math.max(leftoverH,leftoverV);
+          if(shortSide < bestShort || (shortSide===bestShort && longSide<bestLong)){
+            bestShort=shortSide; bestLong=longSide; bestNode={x:r.x,y:r.y,w:rw,h:rh}; rotated=rot;
+          }
+        }
+      }
+    };
+    tryPlace(w,h,false);
+    if(allowRotate) tryPlace(h,w,true);
+    if(!bestNode) return null;
+
+    this.place(bestNode);
+    return {...bestNode, rotated};
+  }
+  place(node){
+    const out=[];
+    for(const r of this.free){
+      if(!this.intersect(node,r)){ out.push(r); continue; }
+      // split r into up to 4 new rects
+      if(node.x > r.x && node.x < r.x + r.w){
+        out.push({x:r.x, y:r.y, w:node.x - r.x, h:r.h});
+        r = {x:node.x, y:r.y, w:r.w - (node.x - r.x), h:r.h};
+      }
+      if(node.x + node.w < r.x + r.w){
+        out.push({x:node.x + node.w, y:r.y, w:(r.x + r.w) - (node.x + node.w), h:r.h});
+        r = {x:r.x, y:r.y, w:node.x + node.w - r.x, h:r.h};
+      }
+      if(node.y > r.y && node.y < r.y + r.h){
+        out.push({x:r.x, y:r.y, w:r.w, h:node.y - r.y});
+        r = {x:r.x, y:node.y, w:r.w, h:r.h - (node.y - r.y)};
+      }
+      if(node.y + node.h < r.y + r.h){
+        out.push({x:r.x, y:node.y + node.h, w:r.w, h:(r.y + r.h) - (node.y + node.h)});
+      }
+    }
+    this.free = out.filter(fr => fr.w>0 && fr.h>0);
+    this.prune();
+    this.used.push(node);
+  }
+  intersect(a,b){ return !(a.x>=b.x+b.w || a.x+a.w<=b.x || a.y>=b.y+b.h || a.y+a.h<=b.y); }
+  prune(){
+    // remove contained rects
+    for(let i=0;i<this.free.length;i++){
+      for(let j=i+1;j<this.free.length;j++){
+        const A=this.free[i], B=this.free[j];
+        if(this.containedIn(A,B)){ this.free.splice(i,1); i--; break; }
+        if(this.containedIn(B,A)){ this.free.splice(j,1); j--; }
+      }
+    }
+  }
+  containedIn(a,b){ return a.x>=b.x && a.y>=b.y && a.x+a.w<=b.x+b.w && a.y+a.h<=b.y+b.h; }
+}
+
+/* ===== Auto-pack across multiple sheets ===== */
 autoPackBtn.onclick = () => {
   if (!items.length) return;
   const s = sheetMm();
   const gutter = Math.max(0, parseFloat(gutterMmEl.value||'0'));
-  // Sort by height (descending) — First Fit Decreasing
-  const sorted = [...items].sort((a,b)=> b.hMm - a.hMm);
-  let x = gutter, y = gutter, rowH = 0;
-  for (const it of sorted){
-    const w = it.wMm, h = it.hMm;
-    if (x + w + gutter > s.w + 1e-6) { // new shelf
-      x = gutter;
-      y += rowH + gutter;
-      rowH = 0;
+  const allowRotate = !!allowRotateEl.checked;
+
+  // sort by area desc
+  const toPlace = [...items].sort((a,b)=> (b.wMm*b.hMm) - (a.wMm*a.hMm));
+
+  // clear sheet indices
+  items.forEach(it=>{ it.sheet=0; });
+
+  const sheets = [];
+  let bin = new MaxRectsBin(s.w, s.h);
+  sheets.push(bin);
+
+  for(const it of toPlace){
+    const W = it.wMm + gutter;
+    const H = it.hMm + gutter;
+    let placed = bin.insert(W, H, allowRotate);
+    if(!placed){
+      bin = new MaxRectsBin(s.w, s.h);
+      sheets.push(bin);
+      placed = bin.insert(W, H, allowRotate);
+      if(!placed){ alert(`Item "${it.name}" is too large for the sheet.`); return; }
     }
-    // If it doesn't fit vertically, stop placing more (or you could scale down last row)
-    if (y + h + gutter > s.h + 1e-6) break;
-    it.xMm = x; it.yMm = y;
-    x += w + gutter;
-    rowH = Math.max(rowH, h);
+    // convert back to image box (remove half-gutter around)
+    const rot = placed.rotated;
+    const realW = rot ? it.hMm : it.wMm;
+    const realH = rot ? it.wMm : it.hMm;
+    it.rotated = rot;
+    it.sheet = sheets.length - 1;
+    it.xMm = placed.x + gutter/2;
+    it.yMm = placed.y + gutter/2;
+    it.wMm = realW;
+    it.hMm = realH;
   }
+
+  totalSheets = sheets.length;
+  currentSheetIndex = 0;
+  sheetNote.textContent = totalSheets>1 ? `Auto-packed into ${totalSheets} sheets` : '';
   render();
 };
 
-/* ===== Proof / Production export ===== */
-downloadProofBtn.onclick=()=> exportCanvas('proof');
-exportProdBtn.onclick=()=> exportCanvas('prod');
+/* ===== Proof / Production export (single sheet or all) ===== */
+downloadProofBtn.onclick=()=> exportSheet(currentSheetIndex,'proof');
+downloadAllProofsBtn.onclick=()=> exportAll('proof');
+exportProdBtn.onclick=()=> exportSheet(currentSheetIndex,'prod');
+exportAllProdBtn.onclick=()=> exportAll('prod');
 
-function exportCanvas(kind){
+function exportAll(kind){
+  for(let i=0;i<totalSheets;i++) exportSheet(i, kind, /*silent*/ true);
+  if(kind==='proof') alert(`Saved ${totalSheets} proof PNGs.`);
+  else alert(`Saved ${totalSheets} production PNGs.`);
+}
+
+function exportSheet(sheetIdx, kind, silent=false){
   const s=sheetMm();
   const wPx = kind==='prod' ? Math.max(1,mmToPxPrint(s.w)) : Math.max(1,mmToPxProof(s.w));
   const hPx = kind==='prod' ? Math.max(1,mmToPxPrint(s.h)) : Math.max(1,mmToPxProof(s.h));
   const c=document.createElement('canvas'); c.width=wPx; c.height=hPx;
   const ctx=c.getContext('2d'); ctx.clearRect(0,0,wPx,hPx);
 
-  for(const it of items){
+  const onSheet = items.filter(it=>it.sheet===sheetIdx);
+  for(const it of onSheet){
     const x = Math.round((it.xMm/s.w)*wPx);
     const y = Math.round((it.yMm/s.h)*hPx);
     const w = Math.round((it.wMm/s.w)*wPx);
@@ -401,15 +520,16 @@ function exportCanvas(kind){
 
   const a=document.createElement('a');
   a.href=c.toDataURL('image/png');
-  a.download=`${kind==='prod'?'production':'proof'}_${sheetKey}_${landscape?'land':'port'}.png`;
+  a.download=`${kind==='prod'?'production':'proof'}_sheet${sheetIdx+1}_${sheetKey}_${landscape?'land':'port'}.png`;
   a.click();
+  if(!silent){ /* no-op */ }
 }
 
 /* ===== Order & Staff ===== */
 function computePrice(){
   const base = SHEETS[sheetKey].price;
   const qty = Number(qtyEl.value||1);
-  priceLine.textContent = `${sheetKey==='ROLL'?'Roll 33×100 cm':'A3/A4'} £${base.toFixed(2)} • Qty ${qty} — Est: £${(base*qty).toFixed(2)}`;
+  priceLine.textContent = `${sheetKey==='ROLL'?'Roll 33×100 cm':sheetKey} £${base.toFixed(2)} • Qty ${qty} — Est: £${(base*qty).toFixed(2)}`;
 }
 qtyEl.addEventListener('input', computePrice); finishEl.addEventListener('change', computePrice);
 computePrice();
@@ -420,14 +540,14 @@ placeOrderBtn.onclick=()=>{
   orderPlaced=true; orderId=uid();
   localStorage.setItem('dtf_order', JSON.stringify({
     id:orderId,name:custName.value,email:custEmail.value,qty:qtyEl.value,finish:finishEl.value,notes:notes.value,
-    sheet:sheetKey,landscape,ts:Date.now()
+    sheet:sheetKey,landscape,ts:Date.now(), sheets: totalSheets
   }));
   afterOrder.style.display='block';
   wmEl.style.display='grid';
   orderStatus.textContent=`Order #${orderId.slice(-6)} placed • awaiting staff`;
-  exportProdBtn.disabled=true;
+  exportProdBtn.disabled=true; exportAllProdBtn.disabled=true;
   hint.textContent='Order placed — editing locked (staff can unlock)';
-  alert('Order placed. You can download a proof. Staff will finalize your print.');
+  alert('Order placed. You can download proofs. Staff will finalize your print.');
 };
 
 staffUnlockBtn.onclick=()=>{
@@ -436,7 +556,7 @@ staffUnlockBtn.onclick=()=>{
   const STAFF_PIN='4312';
   if(pin===STAFF_PIN){
     staffMode=true;
-    exportProdBtn.disabled=false;
+    exportProdBtn.disabled=false; exportAllProdBtn.disabled=false;
     orderStatus.textContent=`Order #${orderId?orderId.slice(-6):'—'} • staff unlocked`;
     hint.textContent='Staff mode — editing allowed';
     wmEl.style.display='none';
@@ -446,6 +566,10 @@ staffUnlockBtn.onclick=()=>{
   }
 };
 
+/* ===== Sheet navigation ===== */
+prevSheetBtn.onclick = ()=>{ if(currentSheetIndex>0){ currentSheetIndex--; render(); } };
+nextSheetBtn.onclick = ()=>{ if(currentSheetIndex<totalSheets-1){ currentSheetIndex++; render(); } };
+
 /* ===== Render ===== */
 function select(id){ activeId=id; render(); }
 function deselect(){ activeId=null; render(); }
@@ -454,13 +578,17 @@ function render(){
   renderSheetButtons();
   updateDimLabel();
 
+  // totalSheets recompute from items
+  totalSheets = Math.max(1, (items.length? (1 + Math.max(...items.map(i=>i.sheet||0))) : 1));
+  currentSheetIndex = clamp(currentSheetIndex, 0, totalSheets-1);
+  sheetIndicator.textContent = `Sheet ${currentSheetIndex+1} / ${totalSheets}`;
+
   const s=sheetMm();
   const w=mmToPreview(s.w), h=mmToPreview(s.h);
   drop.style.width=w+'px'; drop.style.height=h+'px';
 
-  // refresh items
   drop.querySelectorAll('img.item').forEach(n=>n.remove());
-  items.forEach(it=>{
+  items.filter(it=>it.sheet===currentSheetIndex).forEach(it=>{
     const el=document.createElement('img');
     el.src=it.src; el.className='item'+(it.id===activeId?' active':'');
     el.style.left=mmToPreview(it.xMm)+'px';
@@ -478,7 +606,7 @@ function render(){
 
   showSelection(getItem(activeId));
   wmEl.style.display = (orderPlaced && !staffMode) ? 'grid' : 'none';
-  hint.style.display = items.length? 'none' : 'block';
+  hint.style.display = items.filter(it=>it.sheet===currentSheetIndex).length? 'none' : 'block';
 }
 
 /* init */
