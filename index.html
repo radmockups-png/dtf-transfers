@@ -5,14 +5,9 @@
 <meta name="viewport" content="width=device-width,initial-scale=1"/>
 <title>DTF Gang Sheet — MaxRects & Multi-Sheet</title>
 <style>
-  :root{
-    --bg:#0b1220; --panel:#0f172a; --muted:#93a4c2; --text:#e6eefc; 
-    --brand:#7c3aed; --brand-2:#06b6d4; --accent:#22c55e; 
-    --danger:#ef4444; --border:#1f2a44; --chip:#111a33;
-  }
+  :root{--bg:#0b1220;--panel:#0f172a;--muted:#93a4c2;--text:#e6eefc;--brand:#7c3aed;--brand-2:#06b6d4;--accent:#22c55e;--danger:#ef4444;--border:#1f2a44;--chip:#111a33}
   *{box-sizing:border-box}
-  body{margin:0;font:14px/1.4 Inter,ui-sans-serif,system-ui,Segoe UI,Roboto,Helvetica,Arial;color:var(--text);
-       background:linear-gradient(180deg,#0b1220,#0b1220 280px,#0e1628 100%)}
+  body{margin:0;font:14px/1.4 Inter,ui-sans-serif,system-ui,Segoe UI,Roboto,Helvetica,Arial;color:var(--text);background:linear-gradient(180deg,#0b1220,#0b1220 280px,#0e1628 100%)}
   header{position:sticky;top:0;z-index:10;border-bottom:1px solid var(--border);background:rgba(11,18,32,.7);backdrop-filter:saturate(1.2) blur(8px)}
   header .inner{max-width:1240px;margin:0 auto;padding:14px 16px;display:flex;gap:12px;align-items:center}
   .title{font-weight:800;font-size:18px}
@@ -39,10 +34,10 @@
   .editorWrap{background:linear-gradient(180deg,#0f172a,#0c1324);border:1px solid var(--border);border-radius:14px;padding:12px}
   .editorHead{display:flex;justify-content:space-between;margin-bottom:8px}
   .drop{position:relative;margin:0 auto;background:#0b1220;border:1px dashed #2a3a5f;border-radius:12px;overflow:hidden}
+  .drop.drag{background:#0e1a33;border-color:#6b7aa6}
   .item{position:absolute;cursor:grab;filter:drop-shadow(0 6px 34px rgba(0,0,0,.3))}
   .item.active{outline:2px solid var(--brand-2)}
-  .hint{position:absolute;inset:auto 10px 10px auto;background:rgba(12,19,36,.9);border:1px solid var(--border);color:#dbeafe;
-        padding:7px 9px;border-radius:9px;font-size:11px}
+  .hint{position:absolute;inset:auto 10px 10px auto;background:rgba(12,19,36,.9);border:1px solid var(--border);color:#dbeafe;padding:7px 9px;border-radius:9px;font-size:11px}
   .footer{padding:14px 16px;text-align:center;color:var(--muted);font-size:12px}
   .wm{position:absolute;inset:0;pointer-events:none;display:grid;place-items:center;opacity:.18}
   .wm span{font-weight:800;font-size:48px;letter-spacing:.2em;color:#e2e8f0;mix-blend-mode:overlay}
@@ -57,7 +52,7 @@
 </div></header>
 
 <main>
-  <!-- left controls -->
+  <!-- LEFT -->
   <section class="panel">
     <h3>Sheet</h3>
     <div class="row" id="sheetButtons"></div>
@@ -66,14 +61,17 @@
       <div class="pill" id="dimLabel" style="margin-left:auto"></div>
     </div>
     <div class="line"></div>
+
     <h3>Upload</h3>
     <div class="row">
       <button class="btn brand" id="uploadBtn">Upload images</button>
       <input type="file" id="fileInput" accept="image/*,.svg" multiple hidden/>
       <button class="btn ghost" id="resetBtn" style="margin-left:auto">Reset</button>
     </div>
-    <div class="small" style="margin-top:6px">Drag & drop or paste. Best: PNG with transparency.</div>
+    <div class="small" style="margin-top:6px">Drag & drop or paste (Ctrl/⌘+V). Best: PNG with transparency.</div>
+
     <div class="line"></div>
+
     <h3>Packing</h3>
     <div class="row">
       <div class="label">Gutter (mm)</div>
@@ -81,20 +79,23 @@
       <label class="row small"><input type="checkbox" id="allowRotate" checked style="margin-right:6px">Allow 90° rotation</label>
       <button class="btn" id="autoPackBtn">Auto-pack (MaxRects)</button>
     </div>
+
     <div class="line"></div>
+
     <h3>Proof</h3>
     <div class="row">
       <button class="btn" id="downloadProofBtn">Current Proof</button>
       <button class="btn" id="downloadAllProofsBtn">All Proofs</button>
+      <span class="small">150 DPI • watermarked</span>
     </div>
   </section>
 
-  <!-- middle editor -->
+  <!-- CENTER -->
   <section class="editorWrap">
-    <div class="editorHead"><b>Editor</b><div class="subtle">Drag • Click • Nudge</div></div>
+    <div class="editorHead"><b>Editor</b><div class="subtle">Drag • Click • Arrow keys</div></div>
     <div class="sheetbar">
       <button class="btn" id="prevSheetBtn">⟵</button>
-      <div class="pill" id="sheetIndicator">Sheet 1/1</div>
+      <div class="pill" id="sheetIndicator">Sheet 1 / 1</div>
       <button class="btn" id="nextSheetBtn">⟶</button>
     </div>
     <div id="drop" class="drop" style="margin-top:8px">
@@ -103,7 +104,7 @@
     </div>
   </section>
 
-  <!-- right order/staff -->
+  <!-- RIGHT -->
   <section class="panel">
     <h3>Order</h3>
     <div class="grid2">
@@ -111,18 +112,18 @@
       <div><div class="label">Email</div><input class="input" id="custEmail"/></div>
       <div><div class="label">Qty</div><input class="input" id="qty" type="number" min="1" value="1"/></div>
       <div><div class="label">Finish</div>
-        <select class="select" id="finish"><option>Matte</option><option>Gloss</option></select>
+        <select class="select" id="finish"><option value="matte">Matte</option><option value="gloss">Gloss</option></select>
       </div>
     </div>
     <div class="label" style="margin-top:8px">Notes</div>
-    <textarea class="input" id="notes"></textarea>
+    <textarea class="input" id="notes" rows="3"></textarea>
+
     <div class="line"></div>
     <div class="row" style="justify-content:space-between">
-      <div class="small" id="priceLine">A3 £5 • A4 £3 • Roll £12</div>
+      <div class="small" id="priceLine">A3 £5 • A4 £3 • Roll £12 — Est: £0.00</div>
       <button class="btn brand" id="placeOrderBtn">Place Order</button>
     </div>
 
-    <!-- after order -->
     <div id="afterOrder" style="display:none">
       <div class="line"></div>
       <h3>Staff Login</h3>
@@ -131,6 +132,7 @@
         <button class="btn brand" id="staffUnlockBtn">Unlock</button>
       </div>
       <div class="small" id="staffMsg">Production locked until staff enters PIN.</div>
+
       <div class="row" style="margin-top:12px">
         <button class="btn" id="exportProdBtn" disabled>Export Current (300 DPI)</button>
         <button class="btn" id="exportAllProdBtn" disabled>Export ALL Sheets (300 DPI)</button>
@@ -139,58 +141,201 @@
   </section>
 </main>
 
-<div class="footer">Proofs 150DPI + watermark. Production 300DPI requires staff PIN.</div>
+<div class="footer">Proofs are 150 DPI + watermark. Production 300 DPI requires staff PIN.</div>
 
 <script>
-/* constants */
-const MM_PER_INCH=25.4,DPI=300,PROOF_DPI=150;
+/* ---- constants ---- */
+const MM_PER_INCH=25.4, DPI=300, PROOF_DPI=150;
 const SHEETS={A4:{mm:{w:210,h:297},price:3},A3:{mm:{w:297,h:420},price:5},ROLL:{mm:{w:330,h:1000},price:12}};
-function mmToPx(mm,proof=false){return Math.round(mm*(proof?PROOF_DPI:DPI)/MM_PER_INCH);}
-function cmToMm(c){return c*10;} function mmToCm(m){return m/10;}
-function clamp(v,a,b){return Math.max(a,Math.min(v,b));} function uid(){return Date.now()+"_"+Math.random().toString(36).slice(2,7);}
+const STAFF_PIN='4312'; // CHANGE THIS
 
-/* state */
-let sheetKey='A3',landscape=false,items=[],currentSheetIndex=0,totalSheets=1,orderPlaced=false,staffMode=false,orderId=null;
+/* ---- utils ---- */
+const mmToPx=(mm,prod=true)=>Math.round(mm*(prod?DPI:PROOF_DPI)/MM_PER_INCH);
+const cmToMm = c => c*10, mmToCm = m => m/10;
+const clamp=(v,a,b)=>Math.max(a,Math.min(v,b));
+const uid=()=>Date.now()+"_"+Math.random().toString(36).slice(2,7);
 
-/* elements */
-const drop=document.getElementById('drop'),wmEl=document.getElementById('wm'),hint=document.getElementById('hint');
-const sheetButtons=document.getElementById('sheetButtons'),orientBtn=document.getElementById('orientBtn'),dimLabel=document.getElementById('dimLabel');
-const uploadBtn=document.getElementById('uploadBtn'),fileInput=document.getElementById('fileInput'),resetBtn=document.getElementById('resetBtn');
-const autoPackBtn=document.getElementById('autoPackBtn'),gutterMmEl=document.getElementById('gutterMm'),allowRotateEl=document.getElementById('allowRotate');
-const downloadProofBtn=document.getElementById('downloadProofBtn'),downloadAllProofsBtn=document.getElementById('downloadAllProofsBtn');
-const placeOrderBtn=document.getElementById('placeOrderBtn'),afterOrder=document.getElementById('afterOrder');
-const exportProdBtn=document.getElementById('exportProdBtn'),exportAllProdBtn=document.getElementById('exportAllProdBtn');
-const staffPinInput=document.getElementById('staffPinInput'),staffUnlockBtn=document.getElementById('staffUnlockBtn'),staffMsg=document.getElementById('staffMsg');
-const sheetIndicator=document.getElementById('sheetIndicator');
-const prevSheetBtn=document.getElementById('prevSheetBtn'),nextSheetBtn=document.getElementById('nextSheetBtn');
-const custName=document.getElementById('custName'),custEmail=document.getElementById('custEmail'),qtyEl=document.getElementById('qty'),finishEl=document.getElementById('finish'),notes=document.getElementById('notes'),priceLine=document.getElementById('priceLine');
+/* ---- state ---- */
+let sheetKey='A3', landscape=false, items=[], activeId=null;
+let currentSheetIndex=0, totalSheets=1, orderPlaced=false, staffMode=false;
 
-/* helpers */
+/* ---- els ---- */
+const drop=$('#drop'), wmEl=$('#wm'), hint=$('#hint');
+const sheetButtons=$('#sheetButtons'), orientBtn=$('#orientBtn'), dimLabel=$('#dimLabel');
+const uploadBtn=$('#uploadBtn'), fileInput=$('#fileInput'), resetBtn=$('#resetBtn');
+const autoPackBtn=$('#autoPackBtn'), gutterMmEl=$('#gutterMm'), allowRotateEl=$('#allowRotate');
+const downloadProofBtn=$('#downloadProofBtn'), downloadAllProofsBtn=$('#downloadAllProofsBtn');
+const placeOrderBtn=$('#placeOrderBtn'), afterOrder=$('#afterOrder');
+const exportProdBtn=$('#exportProdBtn'), exportAllProdBtn=$('#exportAllProdBtn');
+const staffPinInput=$('#staffPinInput'), staffUnlockBtn=$('#staffUnlockBtn'), staffMsg=$('#staffMsg');
+const sheetIndicator=$('#sheetIndicator'), prevSheetBtn=$('#prevSheetBtn'), nextSheetBtn=$('#nextSheetBtn');
+const custName=$('#custName'), custEmail=$('#custEmail'), qtyEl=$('#qty'), finishEl=$('#finish'), notes=$('#notes'), priceLine=$('#priceLine');
+
+/* ---- helpers ---- */
+function $(s){return document.querySelector(s)}
 function sheetMm(){const s=SHEETS[sheetKey].mm;return landscape?{w:s.h,h:s.w}:s;}
+function mmToPreview(mm){return Math.round(mm*2);} // preview scale
 
-/* upload */
+/* ---- UI bits ---- */
+function renderSheetButtons(){
+  sheetButtons.innerHTML='';
+  for(const k of Object.keys(SHEETS)){
+    const b=document.createElement('button');
+    b.className='chip'+(sheetKey===k?' active':'');
+    b.textContent = k==='ROLL'?'ROLL 33×100':k;
+    b.onclick=()=>{sheetKey=k; currentSheetIndex=0; computePrice(); render();}
+    sheetButtons.appendChild(b);
+  }
+}
+function updateDimLabel(){const s=sheetMm(); dimLabel.textContent=`${s.w} × ${s.h} mm`; orientBtn.textContent=landscape?'Landscape':'Portrait';}
+orientBtn.onclick=()=>{if(orderPlaced&&!staffMode) return alert('Editing locked after order.'); landscape=!landscape; render();}
+
+/* ---- upload / drag / paste ---- */
 uploadBtn.onclick=()=>fileInput.click();
-fileInput.onchange=e=>{[...e.target.files].forEach(addFile);}
-function addFile(f){const url=URL.createObjectURL(f),img=new Image();img.onload=()=>{items.push({id:uid(),name:f.name,src:url,img,wMm:(img.width/DPI*MM_PER_INCH),hMm:(img.height/DPI*MM_PER_INCH),xMm:5,yMm:5,sheet:0,mirrored:false});render();};img.src=url;}
+fileInput.onchange=e=>{for(const f of e.target.files) addFile(f);}
+['dragenter','dragover'].forEach(ev=>drop.addEventListener(ev,e=>{e.preventDefault();drop.classList.add('drag');}));
+['dragleave','dragend','drop'].forEach(ev=>drop.addEventListener(ev,e=>drop.classList.remove('drag')));
+drop.addEventListener('drop',e=>{e.preventDefault(); if(e.dataTransfer?.files) for(const f of e.dataTransfer.files) addFile(f);});
+window.addEventListener('paste',e=>{const its=e.clipboardData?.items||[]; const fs=[]; for(const it of its){if(it.kind==='file'){const f=it.getAsFile(); if(f) fs.push(f)}} if(fs.length){e.preventDefault(); fs.forEach(addFile);}});
+function addFile(f){
+  if(orderPlaced&&!staffMode) return alert('Locked after order.');
+  const url=URL.createObjectURL(f), img=new Image();
+  img.onload=()=>{const wMm=(img.width/DPI*MM_PER_INCH), hMm=(img.height/DPI*MM_PER_INCH);
+    items.push({id:uid(),name:f.name,src:url,img,wMm,hMm,xMm:5,yMm:5,mirrored:false,sheet:0});
+    render();
+  };
+  img.src=url;
+}
+resetBtn.onclick=()=>{if(orderPlaced&&!staffMode) return alert('Locked after order.'); items=[]; currentSheetIndex=0; activeId=null; render();}
 
-/* reset */
-resetBtn.onclick=()=>{items=[];currentSheetIndex=0;render();}
+/* ---- selection / editing ---- */
+document.addEventListener('keydown',e=>{
+  if(!activeId || (orderPlaced&&!staffMode)) return;
+  const it = items.find(i=>i.id===activeId && i.sheet===currentSheetIndex); if(!it) return;
+  const s=sheetMm(), step=e.shiftKey?5:1;
+  if(['ArrowLeft','ArrowRight','ArrowUp','ArrowDown'].includes(e.key)) e.preventDefault();
+  if(e.key==='ArrowLeft')  it.xMm=clamp(it.xMm-step,0,s.w-it.wMm);
+  if(e.key==='ArrowRight') it.xMm=clamp(it.xMm+step,0,s.w-it.wMm);
+  if(e.key==='ArrowUp')    it.yMm=clamp(it.yMm-step,0,s.h-it.hMm);
+  if(e.key==='ArrowDown')  it.yMm=clamp(it.yMm+step,0,s.h-it.hMm);
+  render();
+});
+let drag=null;
+drop.addEventListener('pointermove',e=>{
+  if(!drag) return;
+  const it = items.find(i=>i.id===drag.id); if(!it) return;
+  const s=sheetMm(), r=drop.getBoundingClientRect();
+  const mx=e.clientX-r.left, my=e.clientY-r.top;
+  it.xMm=clamp((mx-drag.offX)/2,0,s.w-it.wMm);
+  it.yMm=clamp((my-drag.offY)/2,0,s.h-it.hMm);
+  draw();
+});
+window.addEventListener('pointerup',()=>drag=null);
 
-/* packing with MaxRects */
-class MaxRectsBin{constructor(w,h){this.w=w;this.h=h;this.free=[{x:0,y:0,w,h}];}
- insert(W,H,rotOk){let best=null;for(const r of this.free){if(W<=r.w&&H<=r.h){best={x:r.x,y:r.y,w:W,h:H,rot:false};break;}if(rotOk&&H<=r.w&&W<=r.h){best={x:r.x,y:r.y,w:H,h:W,rot:true};break;}}if(!best)return null;this.free=[];this.free.push({x:best.x+best.w,y:best.y,w:this.w-(best.x+best.w),h:best.h});this.free.push({x:best.x,y:best.y+best.h,w:best.w,h:this.h-(best.y+best.h)});return best;}}
-autoPackBtn.onclick=()=>{const s=sheetMm(),g=+gutterMmEl.value,rot=allowRotateEl.checked;items.sort((a,b)=>b.wMm*b.hMm-a.wMm*a.hMm);let bins=[new MaxRectsBin(s.w,s.h)],si=0;for(const it of items){let placed=bins[si].insert(it.wMm+g,it.hMm+g,rot);if(!placed){bins.push(new MaxRectsBin(s.w,s.h));si++;placed=bins[si].insert(it.wMm+g,it.hMm+g,rot);}it.sheet=si;it.xMm=placed.x+g/2;it.yMm=placed.y+g/2;if(placed.rot){[it.wMm,it.hMm]=[it.hMm,it.wMm];}}totalSheets=bins.length;currentSheetIndex=0;render();}
+/* ---- MaxRects (simple) + multi-sheet ---- */
+class MaxRectsBin{
+  constructor(w,h){this.w=w;this.h=h;this.free=[{x:0,y:0,w,h}]}
+  insert(W,H,rotOK){
+    // very small best-area-fit variant
+    let best=null, area=Infinity, rotated=false;
+    const tryPlace=(rw,rh,rot)=>{
+      for(const r of this.free){
+        if(rw<=r.w && rh<=r.h){
+          const a = (r.w* r.h) - (rw*rh);
+          if(a<area){area=a; best={x:r.x,y:r.y,w:rw,h:rh}; rotated=rot;}
+        }
+      }
+    };
+    tryPlace(W,H,false); if(rotOK) tryPlace(H,W,true);
+    if(!best) return null;
+    this._split(best); return {...best,rotated};
+  }
+  _split(n){
+    const out=[];
+    for(const r of this.free){
+      if(n.x>=r.x+r.w||n.x+n.w<=r.x||n.y>=r.y+r.h||n.y+n.h<=r.y){out.push(r);continue;}
+      if(n.x>r.x) out.push({x:r.x,y:r.y,w:n.x-r.x,h:r.h});
+      if(n.x+n.w<r.x+r.w) out.push({x:n.x+n.w,y:r.y,w:(r.x+r.w)-(n.x+n.w),h:r.h});
+      if(n.y>r.y) out.push({x:Math.max(r.x,n.x),y:r.y,w:Math.min(r.x+r.w,n.x+n.w)-Math.max(r.x,n.x),h:n.y-r.y});
+      if(n.y+n.h<r.y+r.h) out.push({x:Math.max(r.x,n.x),y:n.y+n.h,w:Math.min(r.x+r.w,n.x+n.w)-Math.max(r.x,n.x),h:(r.y+r.h)-(n.y+n.h)});
+    }
+    this.free=out.filter(a=>a.w>0&&a.h>0);
+  }
+}
+autoPackBtn.onclick=()=>{
+  if(!items.length) return;
+  const s=sheetMm(), g=+gutterMmEl.value||0, rot=!!allowRotateEl.checked;
+  const toPlace=[...items].sort((a,b)=>b.wMm*b.hMm - a.wMm*a.hMm);
+  let bins=[new MaxRectsBin(s.w,s.h)], bi=0;
+  for(const it of toPlace){
+    let placed=bins[bi].insert(it.wMm+g,it.hMm+g,rot);
+    if(!placed){ bins.push(new MaxRectsBin(s.w,s.h)); bi++; placed=bins[bi].insert(it.wMm+g,it.hMm+g,rot); }
+    it.sheet=bi;
+    if(placed.rotated){ [it.wMm,it.hMm] = [it.hMm,it.wMm]; }
+    it.xMm = placed.x + g/2; it.yMm = placed.y + g/2;
+  }
+  totalSheets=bins.length; currentSheetIndex=0; render();
+};
 
-/* export */
-function exportSheet(idx,proof){const s=sheetMm(),w=mmToPx(s.w,!proof),h=mmToPx(s.h,!proof),c=document.createElement('canvas');c.width=w;c.height=h;const ctx=c.getContext('2d');items.filter(it=>it.sheet===idx).forEach(it=>{ctx.drawImage(it.img,(it.xMm/s.w)*w,(it.yMm/s.h)*h,(it.wMm/s.w)*w,(it.hMm/s.h)*h);});if(proof){ctx.globalAlpha=0.2;ctx.font=`${w*0.08}px Arial`;ctx.textAlign="center";ctx.fillText("PROOF ONLY",w/2,h/2);}const a=document.createElement('a');a.href=c.toDataURL();a.download=`${proof?"proof":"prod"}_${idx+1}.png`;a.click();}
-downloadProofBtn.onclick=()=>exportSheet(currentSheetIndex,true);
-downloadAllProofsBtn.onclick=()=>{for(let i=0;i<totalSheets;i++)exportSheet(i,true);};
-exportProdBtn.onclick=()=>exportSheet(currentSheetIndex,false);
-exportAllProdBtn.onclick=()=>{for(let i=0;i<totalSheets;i++)exportSheet(i,false);};
+/* ---- Proof & Production export ---- */
+function exportSheet(idx, proof){
+  const s=sheetMm(), w=mmToPx(s.w,!proof), h=mmToPx(s.h,!proof);
+  const c=document.createElement('canvas'); c.width=w; c.height=h; const ctx=c.getContext('2d');
+  const onSheet=items.filter(i=>i.sheet===idx);
+  for(const it of onSheet){
+    const x=(it.xMm/s.w)*w, y=(it.yMm/s.h)*h, W=(it.wMm/s.w)*w, H=(it.hMm/s.h)*h;
+    ctx.save(); if(it.mirrored){ctx.translate(x+W/2,y+H/2);ctx.scale(-1,1);ctx.translate(-(x+W/2),-(y+H/2));}
+    ctx.drawImage(it.img,x,y,W,H); ctx.restore();
+  }
+  if(proof){ ctx.globalAlpha=.2; ctx.fillStyle="#fff"; ctx.font=`${Math.floor(w*.08)}px system-ui,Arial`; ctx.textAlign="center"; ctx.fillText("PROOF ONLY",w/2,h/2); }
+  const a=document.createElement('a'); a.href=c.toDataURL('image/png'); a.download=`${proof?'proof':'prod'}_sheet${idx+1}_${sheetKey}.png`; a.click();
+}
+$('#downloadProofBtn').onclick=()=>exportSheet(currentSheetIndex,true);
+$('#downloadAllProofsBtn').onclick=()=>{for(let i=0;i<totalSheets;i++) exportSheet(i,true);};
+$('#exportProdBtn').onclick = ()=>exportSheet(currentSheetIndex,false);
+$('#exportAllProdBtn').onclick = ()=>{for(let i=0;i<totalSheets;i++) exportSheet(i,false);};
 
-/* order + staff unlock */
-placeOrderBtn.onclick=()=>{orderPlaced=true;afterOrder.style.display="block";wmEl.style.display="grid";alert("Order placed. Staff must unlock for production export.");}
-staffUnlockBtn.onclick=()=>{const STAFF_PIN="4312";if(staffPinInput.value.trim()===STAFF_PIN){staffMode=true;exportProdBtn.disabled=false;exportAllProdBtn.disabled=false;staffMsg.textContent="✅ Staff mode enabled.";staffMsg.style.color="var(--accent)";wmEl.style.display="none";}else{staffMsg.textContent="❌ Incorrect PIN.";staffMsg.style.color="var(--danger)";}}
+/* ---- Order + Staff ---- */
+function computePrice(){const base=SHEETS[sheetKey].price, qty=+qtyEl.value||1; priceLine.textContent=`${sheetKey==='ROLL'?'Roll 33×100 cm':sheetKey} £${base.toFixed(2)} • Qty ${qty} — Est: £${(base*qty).toFixed(2)}`}
+qtyEl.addEventListener('input',computePrice); finishEl.addEventListener('change',computePrice); computePrice();
 
-/* render */
-function render(){const s=sheetMm();drop.style.width=(s.w*2)+"px";drop.style.height=(s.h*2)+"px";drop.querySelectorAll("img").forEach(n=>n.remove());items.filter(it=>it.sheet===currentSheetIndex).forEach(it
+placeOrderBtn.onclick=()=>{ if(!custName.value||!custEmail.value) return alert('Name & email required.'); if(!items.length) return alert('Add at least one design.'); orderPlaced=true; afterOrder.style.display='block'; wmEl.style.display='grid'; alert('Order placed. Customer can download proofs. Staff must unlock for production.'); };
+
+staffUnlockBtn.onclick=()=>{ if(staffPinInput.value.trim()===STAFF_PIN){ staffMode=true; exportProdBtn.disabled=false; exportAllProdBtn.disabled=false; staffMsg.textContent="✅ Staff mode enabled."; staffMsg.style.color="var(--accent)"; wmEl.style.display='none'; } else { staffMsg.textContent="❌ Incorrect PIN."; staffMsg.style.color="var(--danger)"; } };
+
+/* ---- render ---- */
+function render(){
+  renderSheetButtons(); updateDimLabel(); computePrice();
+  totalSheets = Math.max(1, items.length ? 1+Math.max(...items.map(i=>i.sheet||0)) : 1);
+  currentSheetIndex = clamp(currentSheetIndex,0,totalSheets-1);
+  sheetIndicator.textContent = `Sheet ${currentSheetIndex+1} / ${totalSheets}`;
+
+  const s=sheetMm(); drop.style.width=(s.w*2)+'px'; drop.style.height=(s.h*2)+'px';
+  // clear and draw
+  [...drop.querySelectorAll('img.item')].forEach(n=>n.remove());
+  items.filter(i=>i.sheet===currentSheetIndex).forEach(it=>{
+    const el=document.createElement('img'); el.src=it.src; el.className='item'+(it.id===activeId?' active':'');
+    el.style.left=(it.xMm*2)+'px'; el.style.top=(it.yMm*2)+'px';
+    el.style.width=(it.wMm*2)+'px'; el.style.height=(it.hMm*2)+'px';
+    el.style.transform=`scaleX(${it.mirrored?-1:1})`; el.style.transformOrigin='center';
+    if(!(orderPlaced&&!staffMode)){
+      el.addEventListener('pointerdown',e=>{const r=drop.getBoundingClientRect(); drag={id:it.id,offX:e.clientX-r.left-(it.xMm*2),offY:e.clientY-r.top-(it.yMm*2)}; activeId=it.id; draw();});
+    }
+    el.addEventListener('click',e=>{e.stopPropagation(); activeId=it.id; draw();});
+    drop.appendChild(el);
+  });
+  draw();
+}
+function draw(){ // light refresh without rebuilding buttons
+  const has=items.some(i=>i.sheet===currentSheetIndex);
+  hint.style.display = has ? 'none' : 'block';
+  wmEl.style.display = (orderPlaced && !staffMode) ? 'grid' : 'none';
+}
+prevSheetBtn.onclick=()=>{ if(currentSheetIndex>0){ currentSheetIndex--; render(); } };
+nextSheetBtn.onclick=()=>{ if(currentSheetIndex<totalSheets-1){ currentSheetIndex++; render(); } };
+
+/* init */
+render();
+</script>
+</body>
+</html>
